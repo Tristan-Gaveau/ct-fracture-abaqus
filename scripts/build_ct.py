@@ -55,6 +55,9 @@ A_SUR_W = CAS["a_sur_w"]
 RATIO_BIAIS = CAS["ratio_biais"]
 NOM = CAS["nom"]
 JUSQU_A = CAS.get("jusqu_a", 6)
+MODE = CAS.get("mode", "applique")          # "applique" (charge sur les trous) ou "k_res" (pression sur les lèvres)
+SIGMA0 = CAS.get("sigma0", 0.0)              # MPa, amplitude de la contrainte résiduelle (mode k_res)
+PROFIL = CAS.get("profil", "equilibre")      # "uniforme" ou "equilibre" (mode k_res)
 A = A_SUR_W * P.W           # longueur de fissure depuis la ligne de chargement (mm)
 R = P.RAYON_DISQUE
 
@@ -190,7 +193,49 @@ def fissure():
 
 
 # ----------------------------------------------------------------------------- bloc 4
+def _step_et_sorties(m):
+    m.StaticStep(name="LOAD", previous="Initial", nlgeom=OFF)
+    m.HistoryOutputRequest(name="J_OUT", createStepName="LOAD", contourIntegral="CRACK",
+                           sectionPoints=DEFAULT, rebar=EXCLUDE, numberOfContours=P.N_CONTOURS)
+    m.HistoryOutputRequest(name="K_OUT", createStepName="LOAD", contourIntegral="CRACK",
+                           sectionPoints=DEFAULT, rebar=EXCLUDE, numberOfContours=P.N_CONTOURS,
+                           contourType=K_FACTORS, kFactorDirection=MTS)
+
+
+def k_res_pression():
+    """K_res par superposition : aucune charge externe, pression sur les lèvres de la fissure
+    (p = -sigma_res ; une pression positive ferme la fissure dans Abaqus), pièce libre tenue par deux
+    sommets seulement (réactions attendues nulles), trous libres : pas de couplage."""
+    m = mdb.models[MODELE]
+    asm = m.rootAssembly
+    inst = asm.instances[INSTANCE]
+    _step_et_sorties(m)
+
+    y_bas = -P.HAUTEUR / 2.0
+    for nom, x, bloque_u1 in (("APPUI_1", P.X_FACE_ARRIERE, True), ("APPUI_2", P.X_FACE_AVANT, False)):
+        _sommet(inst, x, y_bas, nom)
+        asm.Set(vertices=inst.vertices.findAt(((x, y_bas, 0.0),)), name=nom)
+        m.DisplacementBC(name="BC_" + nom, createStepName="LOAD", region=asm.sets[nom],
+                         u1=0.0 if bloque_u1 else UNSET, u2=0.0, ur3=UNSET, amplitude=UNSET, fixed=OFF,
+                         distributionType=UNIFORM, fieldName="", localCsys=None)
+
+    aretes = inst.edges.findAt(*[((x, y, 0.0),) for (x, y) in G.points_seam(A)])
+    asm.Surface(side1Edges=aretes, side2Edges=aretes, name="LEVRES")
+    magnitude, expression = G.expression_pression(PROFIL, SIGMA0)
+    if expression is None:
+        m.Pressure(name="P_LEVRES", createStepName="LOAD", region=asm.surfaces["LEVRES"],
+                   distributionType=UNIFORM, field="", magnitude=magnitude, amplitude=UNSET)
+    else:
+        m.ExpressionField(name="PROFIL", localCsys=None, description="", expression=expression)
+        m.Pressure(name="P_LEVRES", createStepName="LOAD", region=asm.surfaces["LEVRES"],
+                   distributionType=FIELD, field="PROFIL", magnitude=magnitude, amplitude=UNSET)
+    print("K_res : profil %s, sigma0 = %.1f MPa, pression sur les lèvres, appuis aux coins bas, pas de couplage"
+          % (PROFIL, SIGMA0))
+
+
 def couplages_step_charges():
+    if MODE == "k_res":
+        return k_res_pression()
     m = mdb.models[MODELE]
     asm = m.rootAssembly
     inst = asm.instances[INSTANCE]
@@ -207,12 +252,7 @@ def couplages_step_charges():
                    surface=asm.surfaces["S_TROU_" + nom], influenceRadius=WHOLE_SURFACE,
                    couplingType=KINEMATIC, localCsys=None, u1=ON, u2=ON, ur3=OFF)
 
-    m.StaticStep(name="LOAD", previous="Initial", nlgeom=OFF)
-    m.HistoryOutputRequest(name="J_OUT", createStepName="LOAD", contourIntegral="CRACK",
-                           sectionPoints=DEFAULT, rebar=EXCLUDE, numberOfContours=P.N_CONTOURS)
-    m.HistoryOutputRequest(name="K_OUT", createStepName="LOAD", contourIntegral="CRACK",
-                           sectionPoints=DEFAULT, rebar=EXCLUDE, numberOfContours=P.N_CONTOURS,
-                           contourType=K_FACTORS, kFactorDirection=MTS)
+    _step_et_sorties(m)
 
     m.ConcentratedForce(name="F_HAUT", createStepName="LOAD", region=asm.sets["RP_HAUT"],
                         cf2=P.P_PAR_MM, distributionType=UNIFORM, field="", localCsys=None)

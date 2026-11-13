@@ -80,6 +80,10 @@ def k_officiel(J):
     k = k_depuis_j(J)[P.PREMIER_CONTOUR_RETENU - 1:]
     return float(k.mean()), float(k.std())
 
+def k1_officiel(K1):
+    """Moyenne SIGNÉE de K1 sur les contours 3 à 10 (MPa*sqrt(mm)). J = K²/E' perd le signe,
+    pas le K1 du tableau des facteurs d'intensité : il sert à K_res."""
+    return float(np.asarray(K1, dtype=float)[P.PREMIER_CONTOUR_RETENU - 1:].mean())
 
 def indicateurs_qualite(J, K1, K2):
     """Dispersion de J (%) et rapport K2/K1 (%) sur les contours retenus."""

@@ -17,7 +17,7 @@ import chemins as C
 NOMS_CONSTANTES = (
     "TWO_D_PLANAR DEFORMABLE_BODY YAXIS XYPLANE SIDE1 RIGHT OFF ON MIDDLE_SURFACE FROM_SECTION CARTESIAN "
     "Q_VECTORS DEFAULT EXCLUDE K_FACTORS MTS WHOLE_SURFACE KINEMATIC UNIFORM UNSET SINGLE FINER QUAD QUAD_DOMINATED SWEEP "
-    "STANDARD CPE8R CPE6 ANALYSIS PERCENTAGE ODB SIDE2 J_INTEGRAL"
+    "STANDARD CPE8R CPE6 ANALYSIS PERCENTAGE ODB SIDE2 J_INTEGRAL FIELD"
 ).split()
 
 
@@ -54,9 +54,11 @@ def faux_abaqus(tmp_path, monkeypatch):
     return mdb
 
 
-def ecrire_json(jusqu_a, a_sur_w=0.5):
-    json.dump({"a_sur_w": a_sur_w, "ratio_biais": 4.0, "nom": "ct_test",
-               "dossier_scripts": str(C.SCRIPTS), "jusqu_a": jusqu_a}, open("cas_en_cours.json", "w"))
+def ecrire_json(jusqu_a, a_sur_w=0.5, **supplement):
+    cas = {"a_sur_w": a_sur_w, "ratio_biais": 4.0, "nom": "ct_test",
+           "dossier_scripts": str(C.SCRIPTS), "jusqu_a": jusqu_a}
+    cas.update(supplement)
+    json.dump(cas, open("cas_en_cours.json", "w"))
 
 
 def test_les_six_blocs_s_enchainent(faux_abaqus, capsys):
@@ -89,3 +91,27 @@ def test_fissure_trop_longue_refusee_avant_abaqus(faux_abaqus):
     ecrire_json(1, a_sur_w=0.9)
     with pytest.raises(ValueError, match="face arrière"):
         runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
+
+def test_mode_k_res_profil_equilibre(faux_abaqus, capsys):
+    ecrire_json(6, mode="k_res", sigma0=100.0, profil="equilibre")
+    runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
+    sortie = capsys.readouterr().out
+    assert "K_res : profil equilibre" in sortie and "ETAPE 6 OK" in sortie
+    modele = faux_abaqus.models.__getitem__.return_value
+    assert modele.ExpressionField.called and modele.Pressure.called
+    assert not modele.Coupling.called and not modele.ConcentratedForce.called      # trous libres, pas de charge
+
+
+def test_mode_k_res_profil_uniforme(faux_abaqus, capsys):
+    ecrire_json(6, mode="k_res", sigma0=-100.0, profil="uniforme")
+    runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
+    modele = faux_abaqus.models.__getitem__.return_value
+    assert modele.Pressure.called and not modele.ExpressionField.called
+    assert modele.Pressure.call_args.kwargs["magnitude"] == 100.0           # sigma0 < 0 : pression de fermeture
+
+
+def test_mode_applique_garde_les_couplages(faux_abaqus):
+    ecrire_json(6)
+    runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
+    modele = faux_abaqus.models.__getitem__.return_value
+    assert modele.Coupling.call_count == 2 and modele.ConcentratedForce.called and not modele.Pressure.called

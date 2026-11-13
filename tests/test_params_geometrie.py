@@ -43,3 +43,40 @@ def test_somme_des_elements_egale_la_longueur():
     q = ratio ** (1.0 / (n - 1))
     h1 = G.h1_depuis_biais(ratio)
     assert abs(sum(h1 * q ** i for i in range(n)) - L) < 1e-9
+
+def test_pression_uniforme():
+    magnitude, expression = G.expression_pression("uniforme", 100.0)
+    assert magnitude == -100.0 and expression is None
+
+
+def test_profil_equilibre_force_et_moment_nuls():
+    import numpy as np
+    magnitude, expression = G.expression_pression("equilibre", 100.0)
+    assert magnitude == 1.0
+    x = np.linspace(P.X_FACE_AVANT, P.X_FACE_ARRIERE, 20001)
+    p = np.array([eval(expression, {"X": xi}) for xi in x])
+    force = np.trapezoid(p, x) if hasattr(np, "trapezoid") else np.trapz(p, x)
+    moment = np.trapezoid(p * x, x) if hasattr(np, "trapezoid") else np.trapz(p * x, x)
+    assert abs(force) < 1e-6 * 100.0 * 62.5
+    assert abs(moment) < 1e-6 * 100.0 * 62.5 ** 2
+
+
+def test_profil_equilibre_signe_et_valeurs():
+    _, expr_pos = G.expression_pression("equilibre", 100.0)
+    _, expr_neg = G.expression_pression("equilibre", -100.0)
+    # face avant : u = 0, sigma_res = +sigma0, donc pression = -sigma0 (ouvre la fissure si sigma0 > 0)
+    assert abs(eval(expr_pos, {"X": P.X_FACE_AVANT}) + 100.0) < 1e-9
+    assert abs(eval(expr_neg, {"X": P.X_FACE_AVANT}) - 100.0) < 1e-9
+    # milieu : u = 0,5 -> 1 - 3 + 1,5 = -0,5 -> sigma_res = -0,5 sigma0 -> pression = +0,5 sigma0
+    milieu = (P.X_FACE_AVANT + P.X_FACE_ARRIERE) / 2.0
+    assert abs(eval(expr_pos, {"X": milieu}) - 50.0) < 1e-9
+
+
+def test_expression_sans_puissance_ni_double_signe():
+    _, expression = G.expression_pression("equilibre", -100.0)
+    assert "**" not in expression and "^" not in expression and "--" not in expression
+
+
+def test_profil_inconnu():
+    with pytest.raises(ValueError):
+        G.expression_pression("triangle", 1.0)

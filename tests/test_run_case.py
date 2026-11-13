@@ -107,3 +107,13 @@ def test_options_de_ligne_de_commande(monkeypatch):
 def test_chemins_coherents():
     assert C.SCRIPTS.name == "scripts" and C.RESULTATS.name == "results"
     assert C.RAW.parent == C.RESULTATS and C.FIGURES.parent == C.RESULTATS
+
+def test_ecrire_cas_mode_k_res(tmp_path):
+    chemin = run_case.ecrire_cas(0.5, 4.0, "ct_kr050", tmp_path, mode="k_res", sigma0=100.0, profil="uniforme")
+    cas = json.load(open(chemin))
+    assert cas["mode"] == "k_res" and cas["sigma0"] == 100.0 and cas["profil"] == "uniforme"
+
+
+def test_lancer_cas_renvoie_k1_signe(faux_abaqus):
+    r = run_case.lancer_cas(0.5, 4.0, "ct_kr050", mode="k_res", sigma0=100.0, profil="equilibre")
+    assert r["mode"] == "k_res" and abs(r["k1_mmsqrt"] - 537.35) < 0.01

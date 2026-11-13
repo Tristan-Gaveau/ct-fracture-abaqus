@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 import params as P
-from run_and_read import (compter_noeuds_elements, indicateurs_qualite, k_depuis_j,
+from run_and_read import (compter_noeuds_elements, indicateurs_qualite, k1_officiel, k_depuis_j,
                           k_officiel, lire_dat)
 
 DAT_EXEMPLE = (Path(__file__).parent / "data" / "dat_exemple.txt").read_text(encoding="utf-8")
@@ -94,3 +94,8 @@ def test_k1_superieur_a_1000_formats_sans_decimales(tmp_path):
     J, K1, K2 = lire_dat(p)
     assert list(K1) == [1217.0, 1219.0, 1221.0, 1222.0, 1223.0, 1224.0, 1225.0, 1226.0, 1227.0, 1228.5]
     assert len(K2) == 10 and len(J) == 10
+
+def test_k1_officiel_moyenne_signee_des_contours_3_a_10():
+    K1 = [523.3, 530.5, 533.7, 534.8, 535.8, 536.6, 537.3, 538.0, 539.5, 543.1]
+    assert abs(k1_officiel(K1) - 537.35) < 0.01
+    assert abs(k1_officiel([-x for x in K1]) + 537.35) < 0.01      # le signe est conservé
