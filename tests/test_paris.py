@@ -5,7 +5,7 @@ import pytest
 
 import params as P
 from k_analytique import calc_k_analytique
-from paris import cycles, etude_sensibilite, fonction_k, restreindre, vitesse
+from paris import cycles, etude_k_res, etude_sensibilite, fonction_k, restreindre, vitesse
 
 def k_constant(valeur):
     return lambda a: np.full_like(np.asarray(a, dtype=float), valeur)
@@ -83,3 +83,24 @@ def test_sensibilite_taille_du_tableau():
 def test_restreindre_garde_la_plage():
     a, k = restreindre([15, 20, 25, 35], [1, 2, 3, 4], 20, 35)
     assert a == [20, 25, 35] and k == [2, 3, 4]
+
+def test_fonction_k_degre_plus_bas_lisse_le_bruit():
+    a = np.array([20.0, 22.5, 25.0, 27.5, 30.0, 32.5, 35.0])
+    k = 7.0 - 0.5 * (a - 20.0) + np.array([0.1, -0.1, 0.1, -0.1, 0.1, -0.1, 0.1])
+    lisse = fonction_k(a, k, deg=1)
+    assert abs(lisse(27.5) - (7.0 - 0.5 * 7.5)) < 0.1
+
+
+def test_etude_k_res_traction_raccourcit_compression_allonge():
+    K = k_constant(20.0)
+    k_res = lambda a: np.full_like(np.asarray(a, dtype=float), 5.0)     # K_res = +5 pour sigma0 = 100
+    lignes = dict(etude_k_res(K, k_res, 100.0, 10.0, 20.0, valeurs_sigma0=(-100.0, 0.0, 100.0)))
+    assert lignes[100.0] < lignes[0.0] < lignes[-100.0]
+
+
+def test_etude_k_res_sigma0_nul_egale_walker_sans_k_res():
+    K = k_constant(20.0)
+    k_res = lambda a: np.full_like(np.asarray(a, dtype=float), 5.0)
+    n0 = dict(etude_k_res(K, k_res, 100.0, 10.0, 20.0, valeurs_sigma0=(0.0,)))[0.0]
+    n_direct = cycles(K, 10.0, 20.0, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER, 0.0)[1][-1]
+    assert np.isclose(n0, n_direct)

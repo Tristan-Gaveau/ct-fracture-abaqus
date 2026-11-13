@@ -101,17 +101,16 @@ def test_mode_k_res_profil_equilibre(faux_abaqus, capsys):
     assert modele.ExpressionField.called and modele.Pressure.called
     assert not modele.Coupling.called and not modele.ConcentratedForce.called      # trous libres, pas de charge
 
-
 def test_mode_k_res_profil_uniforme(faux_abaqus, capsys):
     ecrire_json(6, mode="k_res", sigma0=-100.0, profil="uniforme")
     runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
     modele = faux_abaqus.models.__getitem__.return_value
     assert modele.Pressure.called and not modele.ExpressionField.called
-    assert modele.Pressure.call_args.kwargs["magnitude"] == 100.0           # sigma0 < 0 : pression de fermeture
+    assert modele.Pressure.call_args.kwargs["magnitude"] == -100.0          # sigma0 < 0 : compression, pression négative
 
 
 def test_mode_applique_garde_les_couplages(faux_abaqus):
     ecrire_json(6)
     runpy.run_path(str(C.SCRIPTS / "build_ct.py"), run_name="__main__")
     modele = faux_abaqus.models.__getitem__.return_value
-    assert modele.Pressure.call_args.kwargs["magnitude"] == -100.0          # sigma0 < 0 : compression, pression négative
+    assert modele.Coupling.call_count == 2 and modele.ConcentratedForce.called and not modele.Pressure.called

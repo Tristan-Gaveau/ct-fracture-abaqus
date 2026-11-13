@@ -26,11 +26,12 @@ import params as P
 from k_analytique import calc_k_analytique
 
 
-def fonction_k(a_mm, k_msqrt):
-    """K(a) lissé (polynôme de Tchebychev) sur les points calculés ; refuse l'extrapolation."""
+def fonction_k(a_mm, k_msqrt, deg=6):
+    """K(a) lissé (polynôme de Tchebychev) sur les points calculés ; refuse l'extrapolation.
+    deg=6 sur 7 points = interpolation exacte ; un degré plus bas lisse le bruit numérique."""
     a_mm = np.asarray(a_mm, dtype=float)
     k = np.asarray(k_msqrt, dtype=float)
-    ajuste = np.polynomial.Chebyshev.fit(a_mm, k, deg=min(6, len(a_mm) - 1))
+    ajuste = np.polynomial.Chebyshev.fit(a_mm, k, deg=min(deg, len(a_mm) - 1))
     a_min, a_max = float(a_mm.min()), float(a_mm.max())
 
     def K(a):
@@ -80,15 +81,31 @@ def etude_sensibilite(K, a0_mm, a1_mm, R, C0=P.C_PARIS, ms=(2.5, 3.0, 3.5), fact
     return lignes
 
 
+def etude_k_res(K, k_res_unitaire, sigma0_calcul, a0_mm, a1_mm, valeurs_sigma0=(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0)):
+    """N (loi de Walker) pour plusieurs amplitudes sigma0 de la contrainte résiduelle.
+
+    K_res est linéaire en sigma0 (vérifié : 2 sigma0 donne 2 K_res, -sigma0 donne -K_res) : on met à
+    l'échelle le K_res calculé pour sigma0_calcul. Retourne une liste de (sigma0, N)."""
+    lignes = []
+    for s0 in valeurs_sigma0:
+        echelle = s0 / sigma0_calcul
+        _, N = cycles(K, a0_mm, a1_mm, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER,
+                      lambda a, e=echelle: e * k_res_unitaire(a))
+        lignes.append((float(s0), float(N[-1])))
+    return lignes
+
+
 def charger_csv(chemin, col_a, col_k):
     with open(chemin, newline="", encoding="utf-8") as f:
         lignes = list(csv.DictReader(f))
     return [float(l[col_a]) for l in lignes], [float(l[col_k]) for l in lignes]
 
+
 def restreindre(a_mm, k_msqrt, a_min, a_max):
     """Garde les points de a_min à a_max : plage de validité retenue pour la propagation."""
     garde = [(a, k) for a, k in zip(a_mm, k_msqrt) if a_min - 1e-9 <= a <= a_max + 1e-9]
     return [a for a, _ in garde], [k for _, k in garde]
+
 
 def main():
     C.FIGURES.mkdir(parents=True, exist_ok=True)
@@ -117,14 +134,19 @@ def main():
         for ligne in etude_sensibilite(K, a0, a1, P.R_CHARGE):
             sorties.append(("sensibilite m=%.1f C=%.2e" % (ligne["m"], ligne["C"]), nom, ligne["N"]))
 
-    chemin_kres = C.RESULTATS / "K_res_vs_a.csv"      # colonnes : a_mm, K_res_MPa_sqrt_m
+    chemin_kres = C.RESULTATS / "K_res_vs_a.csv"      # colonnes : a_mm, sigma0_MPa, K_res_MPa_sqrt_m
     if chemin_kres.exists() and "K éléments finis" in cas:
         K = cas["K éléments finis"]
-        k_res = fonction_k(*charger_csv(chemin_kres, "a_mm", "K_res_MPa_sqrt_m"))
-        for etiquette, kr in (("sans K_res", 0.0), ("avec K_res", k_res)):
-            a, N = cycles(K, a0, a1, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER, kr)
-            plt.plot(N, a, "--", label="Walker, " + etiquette)
-            sorties.append(("Walker " + etiquette, "K éléments finis", float(N[-1])))
+        a_kr, k_kr = charger_csv(chemin_kres, "a_mm", "K_res_MPa_sqrt_m")
+        sigma0_calcul = charger_csv(chemin_kres, "a_mm", "sigma0_MPa")[1][0]
+        k_res = fonction_k(a_kr, k_kr, deg=3)          # degré 3 : lisse le bruit numérique (~0,1 MPa√m)
+        for s0, N in etude_k_res(K, k_res, sigma0_calcul, a0, a1):
+            sorties.append(("Walker sigma0=%+.0f MPa" % s0, "K éléments finis", N))
+        for s0 in (-50.0, 0.0, 50.0):
+            e = s0 / sigma0_calcul
+            a, N = cycles(K, a0, a1, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER,
+                          lambda x, e=e: e * k_res(x))
+            plt.plot(N, a, "--", label="Walker, sigma0 = %+.0f MPa" % s0)
 
     plt.xlabel("Nombre de cycles N")
     plt.ylabel("Longueur de fissure a (mm)")
