@@ -1,0 +1,21 @@
+cas,source_K,N_cycles
+Paris,K analytique (ASTM),322569.9130598744
+sensibilite m=2.5 C=8.00e-12,K analytique (ASTM),1576977.5111232172
+sensibilite m=2.5 C=1.00e-11,K analytique (ASTM),1261582.0088985756
+sensibilite m=2.5 C=1.20e-11,K analytique (ASTM),1051318.3407488132
+sensibilite m=3.0 C=8.00e-12,K analytique (ASTM),403212.39132484293
+sensibilite m=3.0 C=1.00e-11,K analytique (ASTM),322569.9130598744
+sensibilite m=3.0 C=1.20e-11,K analytique (ASTM),268808.26088322926
+sensibilite m=3.5 C=8.00e-12,K analytique (ASTM),104427.98234727535
+sensibilite m=3.5 C=1.00e-11,K analytique (ASTM),83542.38587782055
+sensibilite m=3.5 C=1.20e-11,K analytique (ASTM),69618.65489818389
+Paris,K éléments finis,323525.83859479375
+sensibilite m=2.5 C=8.00e-12,K éléments finis,1582097.4914527726
+sensibilite m=2.5 C=1.00e-11,K éléments finis,1265677.9931622175
+sensibilite m=2.5 C=1.20e-11,K éléments finis,1054731.6609685153
+sensibilite m=3.0 C=8.00e-12,K éléments finis,404407.2982434929
+sensibilite m=3.0 C=1.00e-11,K éléments finis,323525.83859479375
+sensibilite m=3.0 C=1.20e-11,K éléments finis,269604.86549566186
+sensibilite m=3.5 C=8.00e-12,K éléments finis,104678.64139421465
+sensibilite m=3.5 C=1.00e-11,K éléments finis,83742.91311537172
+sensibilite m=3.5 C=1.20e-11,K éléments finis,69785.76092947641
