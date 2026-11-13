@@ -7,8 +7,8 @@ comparaison à la formule ASTM E399, puis prédiction de durée de vie en propag
 **État : en cours.** Les chiffres marqués « à compléter » ne sont pas encore mesurés.
 
 ## Résultats clés
-- K éléments finis contre formule (a/W = 0,5) : **−0,8 %** (17,14 contre 17,28 MPa√m), un seul maillage
-- Convergence de maillage : à compléter (`results/convergence_maillage.csv`)
+- K éléments finis contre formule (a/W = 0,5) : **−0,33 %** (17,22 contre 17,28 MPa√m), maillage convergé à la pointe
+- Convergence de maillage : K stable à 0,06 % près pour un premier élément de 0,27 à 0,05 mm (4 maillages, critère 0,2 %)
 - K(a) pour 9 longueurs de fissure : à compléter (`results/K_vs_a.csv`)
 - Durée de vie : à compléter (C et m à sourcer)
 

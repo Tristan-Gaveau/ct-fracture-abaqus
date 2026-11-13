@@ -55,3 +55,10 @@ Le script doit reproduire le calcul manuel pour a/W = 0,5, biais 4 :
   suggérées ou qualité de triangle) : avertissement, pas une erreur ; ils sont dans l'ensemble
   WarnElemDistorted. Leur effet sur J est jugé faible (loin de la pointe), à confirmer par une étude
   de sensibilité sur le maillage des trous.
+
+  ## Critère de convergence (énoncé avant le lancement de convergence.py, le 13/11/2026)
+La variation de K entre deux maillages successifs doit être inférieure à 0,2 %, pour les deux derniers
+pas du raffinement. Variable raffinée : taille du premier élément à la pointe (ratios de biais 4, 10,
+20, 40 ; 10 couches fixes).
+Limite : les autres paramètres (2 éléments par arc, taille globale 5 mm, maillage des trous, couplage
+cinématique) ne sont pas explorés.
