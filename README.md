@@ -10,7 +10,7 @@ comparaison à la formule ASTM E399, puis prédiction de durée de vie en propag
 - K éléments finis contre formule (a/W = 0,5) : **−0,33 %** (17,22 contre 17,28 MPa√m), maillage convergé à la pointe
 - Convergence de maillage : K stable à 0,06 % près pour un premier élément de 0,27 à 0,05 mm (4 maillages, critère 0,2 %)
 - K(a) pour 9 longueurs de fissure : écart à l'ASTM inférieur à 1 % de a/W = 0,4 à 0,7 ; +4,0 % et +2,1 % à a/W = 0,3 et 0,35 (cause non établie), d'où une propagation intégrée de 20 à 35 mm
-- Durée de vie (C, m illustratifs, R = 0,1) : 3,2 × 10⁵ cycles de 20 à 35 mm, identique à 0,3 % près avec K éléments finis ou K ASTM ; N varie d'un facteur 15 entre m = 2,5 et m = 3,5
+- Durée de vie (300M, C et m ajustés sur la figure 2.3.1.4.9 du MIL-HDBK-5J, R = 0,1) : 2,5 × 10⁵ cycles de 20 à 35 mm, identique à 0,3 % près avec K éléments finis ou K ASTM ; N varie d'un facteur 15 pour m ± 0,5 ; effet des contraintes résiduelles (σ0 et γ hypothétiques) de −28 % à +41 % pour γ = 0,5, nul en traction pour γ = 1
 - Contraintes résiduelles (bonus, profil et amplitude HYPOTHÉTIQUES) : K_res par superposition, +6,9 MPa√m à 20 mm pour σ0 = 100 MPa, décroissant et nul vers 34 mm ; effet sur la durée de vie (Walker, C, m, γ illustratifs) de −32 % (σ0 = +100 MPa) à +237 % (σ0 = −100 MPa)
 
 ## Modèle

@@ -104,3 +104,10 @@ def test_etude_k_res_sigma0_nul_egale_walker_sans_k_res():
     n0 = dict(etude_k_res(K, k_res, 100.0, 10.0, 20.0, valeurs_sigma0=(0.0,)))[0.0]
     n_direct = cycles(K, 10.0, 20.0, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER, 0.0)[1][-1]
     assert np.isclose(n0, n_direct)
+
+def test_gamma_1_traction_sans_effet_mais_compression_ralentit():
+    K = k_constant(20.0)
+    k_res = lambda a: np.full_like(np.asarray(a, dtype=float), 5.0)     # K_res = +5 pour sigma0 = 100
+    lignes = dict(etude_k_res(K, k_res, 100.0, 10.0, 20.0, valeurs_sigma0=(-100.0, 0.0, 100.0), gamma=1.0))
+    assert np.isclose(lignes[100.0], lignes[0.0])         # traction, fissure ouverte : DK inchangé
+    assert lignes[-100.0] > lignes[0.0]                   # compression : fermeture, DK réduit

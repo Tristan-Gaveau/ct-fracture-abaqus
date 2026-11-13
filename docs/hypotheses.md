@@ -77,7 +77,12 @@ Le contour 1 est écarté (peu précis). On rapporte aussi la dispersion de J (c
 ## Propagation
 - Loi de Paris : da/dN = C (DK)^m ; loi de Walker : da/dN = C [K_max (1 − R)^gamma]^m.
 - C, m, gamma de params.py : valeurs illustratives, à remplacer par une source citée.
-- C et m sont corrélés : varier m seul à C fixé exagère l'effet sur N.
+- C et m : ajustés sur la figure 2.3.1.4.9 de la MIL-HDBK-5J (scripts/ajuster_paris.py, 15 points numérisés avec
+  WebPlotDigitizer, ΔK de 10 à 29 ksi√po) : C = 3,121e-11 (m/cycle, MPa√m), m = 2,672, dispersion autour de
+  la droite d'un facteur 1,07. La pente locale baisse de 2,69 (10-18 ksi√po) à 2,28 (18-29) : la loi à un
+  seul exposant est une approximation. La bande regroupe R = 0,08 à 0,5.
+- γ (Walker) : aucune source ; étudié de 0,5 à 1. Pour γ = 1, une contrainte résiduelle en traction n'a
+  aucun effet (DK inchangé) ; une compression ralentit quand même la fissure par fermeture simplifiée.
 - N varie d'un facteur 15 entre m = 2,5 et m = 3,5 (C = 1e-11) : DK est élevé à la puissance m.
 - Zone de propagation stable seulement : ni seuil DK_th, ni rupture finale.
 - À contrôler : K_max < K_Ic sur tout l'intervalle de a (K_Ic à renseigner dans params.py).

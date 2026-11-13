@@ -44,11 +44,12 @@ TOL_K = 0.005                           # 0,5 % (idéalement 0,1 %)
 
 MMSQRT_VERS_MSQRT = 1.0 / math.sqrt(1000.0)
 
-# --- Propagation (paris.py) : valeurs ILLUSTRATIVES, à remplacer par une source citée ---
-C_PARIS = 1.0e-11                       # da/dN en m/cycle, DK en MPa*sqrt(m)
-M_PARIS = 3.0
+# --- Propagation (paris.py) ---
+# C et m : ajustés (scripts/ajuster_paris.py) sur la figure 2.3.1.4.9 de la MIL-HDBK-5J (300M, CT, R = 0,08 à 0,5).
+C_PARIS = 3.121e-11                     # da/dN en m/cycle, DK en MPa*sqrt(m)
+M_PARIS = 2.672
 R_CHARGE = 0.1                          # P_min / P_max
-GAMMA_WALKER = 0.5                      # exposant de Walker (aciers : environ 0,5 à 0,9)
+GAMMA_WALKER = 0.5                      # exposant de Walker : NON SOURCÉ, traité comme paramètre (voir paris.py)
 A_INITIAL_SUR_W = 0.40                  # début de l'intégration : K(a) FE à +/-1 % de l'ASTM à partir de a/W = 0,4
 A_FINAL_SUR_W = 0.70                    # fin de l'intégration
 K_IC = None                             # MPa*sqrt(m) : À RENSEIGNER (source citée) pour contrôler K_max < K_Ic

@@ -1,21 +1,36 @@
 cas,source_K,N_cycles
-Paris,K analytique (ASTM),322569.9130598744
-sensibilite m=2.5 C=8.00e-12,K analytique (ASTM),1576977.5111232172
-sensibilite m=2.5 C=1.00e-11,K analytique (ASTM),1261582.0088985756
-sensibilite m=2.5 C=1.20e-11,K analytique (ASTM),1051318.3407488132
-sensibilite m=3.0 C=8.00e-12,K analytique (ASTM),403212.39132484293
-sensibilite m=3.0 C=1.00e-11,K analytique (ASTM),322569.9130598744
-sensibilite m=3.0 C=1.20e-11,K analytique (ASTM),268808.26088322926
-sensibilite m=3.5 C=8.00e-12,K analytique (ASTM),104427.98234727535
-sensibilite m=3.5 C=1.00e-11,K analytique (ASTM),83542.38587782055
-sensibilite m=3.5 C=1.20e-11,K analytique (ASTM),69618.65489818389
-Paris,K éléments finis,323525.83859479375
-sensibilite m=2.5 C=8.00e-12,K éléments finis,1582097.4914527726
-sensibilite m=2.5 C=1.00e-11,K éléments finis,1265677.9931622175
-sensibilite m=2.5 C=1.20e-11,K éléments finis,1054731.6609685153
-sensibilite m=3.0 C=8.00e-12,K éléments finis,404407.2982434929
-sensibilite m=3.0 C=1.00e-11,K éléments finis,323525.83859479375
-sensibilite m=3.0 C=1.20e-11,K éléments finis,269604.86549566186
-sensibilite m=3.5 C=8.00e-12,K éléments finis,104678.64139421465
-sensibilite m=3.5 C=1.00e-11,K éléments finis,83742.91311537172
-sensibilite m=3.5 C=1.20e-11,K éléments finis,69785.76092947641
+Paris,K analytique (ASTM),252460.84913678476
+sensibilite m=2.2 C=2.50e-11,K analytique (ASTM),1245950.2997438195
+sensibilite m=2.2 C=3.12e-11,K analytique (ASTM),996760.2397950551
+sensibilite m=2.2 C=3.75e-11,K analytique (ASTM),830633.5331625479
+sensibilite m=2.7 C=2.50e-11,K analytique (ASTM),315576.06142098084
+sensibilite m=2.7 C=3.12e-11,K analytique (ASTM),252460.84913678476
+sensibilite m=2.7 C=3.75e-11,K analytique (ASTM),210384.04094732105
+sensibilite m=3.2 C=2.50e-11,K analytique (ASTM),81062.55576029861
+sensibilite m=3.2 C=3.12e-11,K analytique (ASTM),64850.044608238946
+sensibilite m=3.2 C=3.75e-11,K analytique (ASTM),54041.70384019938
+Paris,K éléments finis,253264.27053990462
+sensibilite m=2.2 C=2.50e-11,K éléments finis,1250023.836440227
+sensibilite m=2.2 C=3.12e-11,K éléments finis,1000019.069152179
+sensibilite m=2.2 C=3.75e-11,K éléments finis,833349.2242934853
+sensibilite m=2.7 C=2.50e-11,K éléments finis,316580.3381748813
+sensibilite m=2.7 C=3.12e-11,K éléments finis,253264.27053990462
+sensibilite m=2.7 C=3.75e-11,K éléments finis,211053.55878325392
+sensibilite m=3.2 C=2.50e-11,K éléments finis,81289.53576891335
+sensibilite m=3.2 C=3.12e-11,K éléments finis,65031.62861513065
+sensibilite m=3.2 C=3.75e-11,K éléments finis,54193.02384594238
+Walker gamma=0.50 sigma0=-100 MPa,K éléments finis,617808.2366761608
+Walker gamma=0.50 sigma0=-50 MPa,K éléments finis,310465.9978608992
+Walker gamma=0.50 sigma0=+0 MPa,K éléments finis,220009.74531045466
+Walker gamma=0.50 sigma0=+50 MPa,K éléments finis,183600.6694174427
+Walker gamma=0.50 sigma0=+100 MPa,K éléments finis,158066.71235579948
+Walker gamma=0.75 sigma0=-100 MPa,K éléments finis,618840.9181753478
+Walker gamma=0.75 sigma0=-50 MPa,K éléments finis,312631.5548951351
+Walker gamma=0.75 sigma0=+0 MPa,K éléments finis,236052.1291107593
+Walker gamma=0.75 sigma0=+50 MPa,K éléments finis,215432.38628695902
+Walker gamma=0.75 sigma0=+100 MPa,K éléments finis,199459.14597834728
+Walker gamma=1.00 sigma0=-100 MPa,K éléments finis,619926.1127513811
+Walker gamma=1.00 sigma0=-50 MPa,K éléments finis,314899.3230086701
+Walker gamma=1.00 sigma0=+0 MPa,K éléments finis,253264.27053990462
+Walker gamma=1.00 sigma0=+50 MPa,K éléments finis,253264.27053990462
+Walker gamma=1.00 sigma0=+100 MPa,K éléments finis,253264.27053990462

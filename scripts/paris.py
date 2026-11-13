@@ -70,9 +70,11 @@ def cycles(K, a0_mm, a1_mm, C_paris, m, R, gamma=1.0, k_res=0.0, n=2000):
     return a, np.concatenate([[0.0], np.cumsum(dN)])
 
 
-def etude_sensibilite(K, a0_mm, a1_mm, R, C0=P.C_PARIS, ms=(2.5, 3.0, 3.5), facteurs_C=(0.8, 1.0, 1.2)):
-    """N pour C +/- 20 % et plusieurs m. Attention : C et m sont corrélés ; varier m seul à C fixé
-    exagère l'effet (à écrire dans le README)."""
+def etude_sensibilite(K, a0_mm, a1_mm, R, C0=None, ms=None, facteurs_C=(0.8, 1.0, 1.2)):
+    """N pour C +/- 20 % et plusieurs m (par défaut m ajusté -0,5, m ajusté, +0,5). Attention : C et m sont
+    corrélés ; varier m seul à C fixé exagère l'effet (à écrire dans le README)."""
+    C0 = P.C_PARIS if C0 is None else C0
+    ms = (P.M_PARIS - 0.5, P.M_PARIS, P.M_PARIS + 0.5) if ms is None else ms
     lignes = []
     for m in ms:
         for f in facteurs_C:
@@ -81,15 +83,17 @@ def etude_sensibilite(K, a0_mm, a1_mm, R, C0=P.C_PARIS, ms=(2.5, 3.0, 3.5), fact
     return lignes
 
 
-def etude_k_res(K, k_res_unitaire, sigma0_calcul, a0_mm, a1_mm, valeurs_sigma0=(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0)):
+def etude_k_res(K, k_res_unitaire, sigma0_calcul, a0_mm, a1_mm, valeurs_sigma0=(-100.0, -50.0, -25.0, 0.0, 25.0, 50.0, 100.0), gamma=None):
     """N (loi de Walker) pour plusieurs amplitudes sigma0 de la contrainte résiduelle.
 
     K_res est linéaire en sigma0 (vérifié : 2 sigma0 donne 2 K_res, -sigma0 donne -K_res) : on met à
-    l'échelle le K_res calculé pour sigma0_calcul. Retourne une liste de (sigma0, N)."""
+    l'échelle le K_res calculé pour sigma0_calcul. gamma : exposant de Walker (par défaut params.GAMMA_WALKER).
+    Retourne une liste de (sigma0, N)."""
+    g = P.GAMMA_WALKER if gamma is None else gamma
     lignes = []
     for s0 in valeurs_sigma0:
         echelle = s0 / sigma0_calcul
-        _, N = cycles(K, a0_mm, a1_mm, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER,
+        _, N = cycles(K, a0_mm, a1_mm, P.C_PARIS, P.M_PARIS, P.R_CHARGE, g,
                       lambda a, e=echelle: e * k_res_unitaire(a))
         lignes.append((float(s0), float(N[-1])))
     return lignes
@@ -140,14 +144,14 @@ def main():
         a_kr, k_kr = charger_csv(chemin_kres, "a_mm", "K_res_MPa_sqrt_m")
         sigma0_calcul = charger_csv(chemin_kres, "a_mm", "sigma0_MPa")[1][0]
         k_res = fonction_k(a_kr, k_kr, deg=3)          # degré 3 : lisse le bruit numérique (~0,1 MPa√m)
-        for s0, N in etude_k_res(K, k_res, sigma0_calcul, a0, a1):
-            sorties.append(("Walker sigma0=%+.0f MPa" % s0, "K éléments finis", N))
+        for g in (0.5, 0.75, 1.0):                     # gamma n'est fixé par aucune source : on le fait varier
+            for s0, N in etude_k_res(K, k_res, sigma0_calcul, a0, a1, valeurs_sigma0=(-100.0, -50.0, 0.0, 50.0, 100.0), gamma=g):
+                sorties.append(("Walker gamma=%.2f sigma0=%+.0f MPa" % (g, s0), "K éléments finis", N))
         for s0 in (-50.0, 0.0, 50.0):
             e = s0 / sigma0_calcul
             a, N = cycles(K, a0, a1, P.C_PARIS, P.M_PARIS, P.R_CHARGE, P.GAMMA_WALKER,
                           lambda x, e=e: e * k_res(x))
-            plt.plot(N, a, "--", label="Walker, sigma0 = %+.0f MPa" % s0)
-
+            plt.plot(N, a, "--", label="Walker (gamma = %.2f), sigma0 = %+.0f MPa" % (P.GAMMA_WALKER, s0))
     plt.xlabel("Nombre de cycles N")
     plt.ylabel("Longueur de fissure a (mm)")
     plt.title("Propagation : a(N)")
