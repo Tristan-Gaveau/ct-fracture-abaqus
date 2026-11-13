@@ -1,0 +1,21 @@
+# Fichiers générés par Abaqus
+*.odb
+*.cae
+*.jnl
+*.rpy
+*.rpy.*
+*.sta
+*.msg
+*.prt
+*.sim
+*.com
+*.lck
+abaqus_acis.log
+
+# Calculs lancés par les scripts (on ne garde que results/)
+calculs/
+
+# Python
+__pycache__/
+.pytest_cache/
+*.pyc
