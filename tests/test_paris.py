@@ -5,8 +5,7 @@ import pytest
 
 import params as P
 from k_analytique import calc_k_analytique
-from paris import cycles, etude_sensibilite, fonction_k, vitesse
-
+from paris import cycles, etude_sensibilite, fonction_k, restreindre, vitesse
 
 def k_constant(valeur):
     return lambda a: np.full_like(np.asarray(a, dtype=float), valeur)
@@ -80,3 +79,7 @@ def test_pas_d_extrapolation():
 def test_sensibilite_taille_du_tableau():
     lignes = etude_sensibilite(k_constant(20.0), 10, 20, 0.1)
     assert len(lignes) == 9
+
+def test_restreindre_garde_la_plage():
+    a, k = restreindre([15, 20, 25, 35], [1, 2, 3, 4], 20, 35)
+    assert a == [20, 25, 35] and k == [2, 3, 4]

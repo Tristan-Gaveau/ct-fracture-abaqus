@@ -49,6 +49,6 @@ C_PARIS = 1.0e-11                       # da/dN en m/cycle, DK en MPa*sqrt(m)
 M_PARIS = 3.0
 R_CHARGE = 0.1                          # P_min / P_max
 GAMMA_WALKER = 0.5                      # exposant de Walker (aciers : environ 0,5 à 0,9)
-A_INITIAL_SUR_W = 0.30                  # début de l'intégration (dans la plage calculée de K(a))
+A_INITIAL_SUR_W = 0.40                  # début de l'intégration : K(a) FE à +/-1 % de l'ASTM à partir de a/W = 0,4
 A_FINAL_SUR_W = 0.70                    # fin de l'intégration
 K_IC = None                             # MPa*sqrt(m) : À RENSEIGNER (source citée) pour contrôler K_max < K_Ic

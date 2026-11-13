@@ -85,6 +85,10 @@ def charger_csv(chemin, col_a, col_k):
         lignes = list(csv.DictReader(f))
     return [float(l[col_a]) for l in lignes], [float(l[col_k]) for l in lignes]
 
+def restreindre(a_mm, k_msqrt, a_min, a_max):
+    """Garde les points de a_min à a_max : plage de validité retenue pour la propagation."""
+    garde = [(a, k) for a, k in zip(a_mm, k_msqrt) if a_min - 1e-9 <= a <= a_max + 1e-9]
+    return [a for a, _ in garde], [k for _, k in garde]
 
 def main():
     C.FIGURES.mkdir(parents=True, exist_ok=True)
@@ -92,7 +96,8 @@ def main():
     cas = {"K analytique (ASTM)": fonction_k_analytique()}
     chemin_k = C.RESULTATS / "K_vs_a.csv"
     if chemin_k.exists():
-        cas["K éléments finis"] = fonction_k(*charger_csv(chemin_k, "a_mm", "K_FE_MPa_sqrt_m"))
+        a_pts, k_pts = restreindre(*charger_csv(chemin_k, "a_mm", "K_FE_MPa_sqrt_m"), a0, a1)
+        cas["K éléments finis"] = fonction_k(a_pts, k_pts)
     else:
         print("K_vs_a.csv absent : calcul avec le K analytique seulement (illustratif).")
 

@@ -1,0 +1,292 @@
+1
+
+   Abaqus Learning Edition 2026                                  Date 13-Nov-2026   Time 10:39:30
+   
+
+
+
+     PROCESSING PART, INSTANCE, AND ASSEMBLY INFORMATION
+   *******************************************************
+
+
+     END PROCESSING PART, INSTANCE, AND ASSEMBLY INFORMATION
+   ***********************************************************
+
+
+
+
+     OPTIONS BEING PROCESSED
+   ***************************
+
+
+  *heading
+  *contourintegral, crackname=J_OUT_CRACK, contours=10, cracktipnodes
+  *contourintegral, crackname=K_OUT_CRACK, type=KFACTORS, contours=10, cracktipnodes
+  *material, name=ACIER
+  *elastic
+  *solidsection, elset=ASSEMBLY_PART-1-1__PICKEDSET9, material=ACIER
+  *solidsection, elset=ASSEMBLY_PART-1-1__PICKEDSET9, material=ACIER
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_BAS
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_HAUT
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_BAS
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_HAUT
+  *coupling, constraintname=ASSEMBLY_CPL_BAS, refnode=ASSEMBLY_RP_BAS, surface=ASSEMBLY_S
+  *coupling, constraintname=ASSEMBLY_CPL_HAUT, refnode=ASSEMBLY_RP_HAUT, surface=ASSEMBLY
+  *coupling, constraintname=ASSEMBLY_CPL_BAS, refnode=ASSEMBLY_RP_BAS, surface=ASSEMBLY_S
+  *coupling, constraintname=ASSEMBLY_CPL_HAUT, refnode=ASSEMBLY_RP_HAUT, surface=ASSEMBLY
+  *coupling, constraintname=ASSEMBLY_CPL_BAS, refnode=ASSEMBLY_RP_BAS, surface=ASSEMBLY_S
+  *kinematic
+
+ ***NOTE: WHENEVER A TRANSLATION (ROTATION) DOF AT A NODE IS CONSTRAINED BY A 
+          KINEMATIC COUPLING DEFINITION THE TRANSLATION (ROTATION) DOFS FOR 
+          THAT NODE CANNOT BE INCLUDED IN ANY OTHER CONSTRAINT INCLUDING MPCS, 
+          RIGID BODIES, ETC.
+  *coupling, constraintname=ASSEMBLY_CPL_HAUT, refnode=ASSEMBLY_RP_HAUT, surface=ASSEMBLY
+  *kinematic
+  *coupling, constraintname=ASSEMBLY_CPL_BAS, refnode=ASSEMBLY_RP_BAS, surface=ASSEMBLY_S
+  *coupling, constraintname=ASSEMBLY_CPL_HAUT, refnode=ASSEMBLY_RP_HAUT, surface=ASSEMBLY
+  *coupling, constraintname=ASSEMBLY_CPL_BAS, refnode=ASSEMBLY_RP_BAS, surface=ASSEMBLY_S
+  *coupling, constraintname=ASSEMBLY_CPL_HAUT, refnode=ASSEMBLY_RP_HAUT, surface=ASSEMBLY
+  *boundary
+  *boundary
+  *boundary
+  *boundary
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_BAS
+  *surface, type=ELEMENT, name=ASSEMBLY_S_TROU_HAUT
+  *output, field, variable=PRESELECT
+  *output, history
+  *output, history, variable=PRESELECT
+  *output, field, variable=PRESELECT
+  *output, history
+  *output, history, variable=PRESELECT
+  *output, field, variable=PRESELECT
+  *output, history
+  *output, history, variable=PRESELECT
+
+ ***NOTE: MPCS (EXTERNAL or INTERNAL, including those generated from rigid body 
+          definitions), KINEMATIC COUPLINGS, AND/OR EQUATIONS WILL ACTIVATE 
+          ADDITIONAL DEGREES OF FREEDOM
+  
+                               E L E M E N T   Q U A L I T Y  C H E C K S        
+  
+  
+ ***NOTES: DISTORTED ISOPARAMETRIC ELEMENTS: ANGLE BETWEEN ISOPARAMETRIC LINES 
+           IS LESS THAN 45 DEGREES OR GREATER THAN 135 DEGREES.
+  
+           TETRAHEDRAL QUALITY MEASURE: VOLUME OF TETRAHEDRON DIVIDED BY THE 
+           VOLUME OF EQUILATERAL TETRAHEDRON WITH SAME CIRCUMSPHERE RADIUS; 
+           0 FOR DEGENERATE TETRAHEDRON AND 1 FOR EQUILATERIAL TETRAHEDRON. IT 
+           IS RECOMMENDED THAT THE TETRAHEDRAL QUALITY MEASURE BE GREATER THAN 
+           0.02, THE MIN INTERIOR (DIHEDRAL) ANGLE BE GREATER THAN 10 DEGREES, 
+           AND THE MAX INTERIOR (DIHEDRAL) ANGLE BE LESS THAN 160 DEGREES. 
+  
+           MODIFIED TETRAHEDRAL QUALITY MEASURE: ANGLES BETWEEN THE TWO LINE 
+           SEGMENTS ON EACH EDGE; THE EDGES OF MODIFIED TETRAHEDRAL SHOULD BE 
+           AS STRAIGHT AS POSSIBLE. IT IS RECOMMENDED THAT THE ANGLE BETWEEN 
+           THE TWO LINE SEGMENTS ON EACH EDGE IS BETWEEN 160 AND 180 DEGREES. 
+  
+           TRIANGULAR QUALITY MEASURE: AREA OF TRIANGLE DIVIDED BY THE AREA OF 
+           EQUILATERAL TRIANGLE WITH SAME CIRCUMCIRCLE RADIUS; 0 FOR DEGENERATE 
+           TRIANGLE AND 1 FOR EQUILATERAL TRIANGLE. IT IS RECOMMENDED THAT THE
+           TRIANGULAR QUALITY MEASURE BE GREATER THAN 0.01, THE MIN INTERIOR 
+           ANGLE BE GREATER THAN 10 DEGREES, AND THE MAX INTERIOR ANGLE BE LESS 
+           THAN 160 DEGREES. 
+  
+           NODAL ADJUSTMENTS ARISING FROM CONTACT INTERACTIONS AND/OR TIE 
+           CONSTRAINTS CAN CAUSE SEVERE ELEMENT DISTORTION. IT MAY BE NECESSARY 
+           TO REMESH IN ORDER TO REDUCE THE AMOUNT OF ADJUSTMENT. 
+
+ ***WARNING: 5 elements are distorted. Either the isoparametric angles are out 
+             of the suggested limits or the triangular or tetrahedral quality 
+             measure is bad. The elements have been identified in element set 
+             WarnElemDistorted.
+  
+ --------------------------------------------------------------------------------
+ Distorted isoparametric elements
+  
+      Element        Min/max angle   Adjusted nodes 
+ ------------------ ---------------- -------------- 
+        PART-1-1.40           44.325       NO       
+        PART-1-1.49          40.7943       NO       
+        PART-1-1.71          36.9548       NO       
+       PART-1-1.155          44.3003       NO       
+       PART-1-1.171          40.1356       NO       
+  
+  
+  *step, name=LOAD, nlgeom=NO
+  *step, name=LOAD, nlgeom=NO
+  *output, field, variable=PRESELECT
+  *output, history
+  *output, history, variable=PRESELECT
+  *step, name=LOAD, nlgeom=NO
+  *step, name=LOAD, nlgeom=NO
+  *static
+  *boundary
+  *boundary
+  *output, field, variable=PRESELECT
+  *output, history
+  *output, history, variable=PRESELECT
+  *endstep
+  *step, name=LOAD, nlgeom=NO
+  *static
+  *boundary
+  *boundary
+  *cload
+  *contourintegral, crackname=J_OUT_CRACK, contours=10, cracktipnodes
+  *contourintegral, crackname=K_OUT_CRACK, type=KFACTORS, contours=10, cracktipnodes
+  *endstep
+
+
+
+                            P R O B L E M   S I Z E
+
+
+          NUMBER OF ELEMENTS IS                                   244
+          NUMBER OF NODES IS                                      815
+          NUMBER OF NODES DEFINED BY THE USER                     815
+          TOTAL NUMBER OF VARIABLES IN THE MODEL                 1632
+          (DEGREES OF FREEDOM PLUS MAX NO. OF ANY LAGRANGE MULTIPLIER
+           VARIABLES. INCLUDE *PRINT,SOLVE=YES TO GET THE ACTUAL NUMBER.)
+
+
+
+                              END OF USER INPUT PROCESSING
+
+
+
+     JOB TIME SUMMARY
+       USER TIME (SEC)      =     0.20    
+       SYSTEM TIME (SEC)    =      0.0    
+       TOTAL CPU TIME (SEC) =     0.20    
+       WALLCLOCK TIME (SEC) =            0
+1
+
+   Abaqus Learning Edition 2026                                  Date 13-Nov-2026   Time 10:39:30
+   
+
+                                                                                               STEP    1  INCREMENT    1
+                                                                                          TIME COMPLETED IN THIS STEP   0.00    
+
+
+                        S T E P       1     S T A T I C   A N A L Y S I S
+
+
+                                                                                          
+
+     AUTOMATIC TIME CONTROL WITH -
+          A SUGGESTED INITIAL TIME INCREMENT OF                 1.00    
+          AND A TOTAL TIME PERIOD OF                            1.00    
+          THE MINIMUM TIME INCREMENT ALLOWED IS                1.000E-05
+          THE MAXIMUM TIME INCREMENT ALLOWED IS                 1.00    
+
+     LINEAR EQUATION SOLVER TYPE         DIRECT SPARSE
+  
+                   M E M O R Y   E S T I M A T E
+  
+ PROCESS      FLOATING PT       MINIMUM MEMORY        MEMORY TO
+              OPERATIONS           REQUIRED          MINIMIZE I/O
+             PER ITERATION           (MB)               (MB)
+  
+     1          3.41E+06               17                 25
+  
+ NOTE:
+      (1) SINCE ABAQUS DOES NOT PRE-ALLOCATE MEMORY AND ONLY ALLOCATES MEMORY AS NEEDED DURING THE ANALYSIS,
+          THE MEMORY REQUIREMENT PRINTED HERE CAN ONLY BE VIEWED AS A GENERAL GUIDELINE BASED ON THE BEST
+          KNOWLEDGE AVAILABLE AT THE BEGINNING OF A STEP BEFORE THE SOLUTION PROCESS HAS BEGUN.
+      (2) THE ESTIMATE IS NORMALLY UPDATED AT THE BEGINNING OF EVERY STEP. IT IS THE MAXIMUM VALUE OF THE
+          ESTIMATE FROM THE CURRENT STEP TO THE LAST STEP OF THE ANALYSIS, WITH UNSYMMETRIC SOLUTION TAKEN
+          INTO ACCOUNT IF APPLICABLE. 
+      (3) SINCE THE ESTIMATE IS BASED ON THE ACTIVE DEGREES OF FREEDOM IN THE FIRST ITERATION OF THE 
+          CURRENT STEP, THE MEMORY ESTIMATE MIGHT BE SIGNIFICANTLY DIFFERENT THAN ACTUAL USAGE FOR 
+          PROBLEMS WITH SUBSTANTIAL CHANGES IN ACTIVE DEGREES OF FREEDOM BETWEEN STEPS (OR EVEN WITHIN
+          THE SAME STEP). EXAMPLES ARE: PROBLEMS WITH SIGNIFICANT CONTACT CHANGES, PROBLEMS WITH MODEL
+          CHANGE, PROBLEMS WITH BOTH STATIC STEP AND STEADY STATE DYNAMIC PROCEDURES WHERE ACOUSTIC 
+          ELEMENTS WILL ONLY BE ACTIVATED IN THE STEADY STATE DYNAMIC STEPS.
+      (4) FOR MULTI-PROCESS EXECUTION, THE ESTIMATED VALUE OF FLOATING POINT OPERATIONS FOR EACH PROCESS
+          IS BASED ON AN INITIAL SCHEDULING OF OPERATIONS AND MIGHT NOT REFLECT THE ACTUAL FLOATING 
+          POINT OPERATIONS COMPLETED ON EACH PROCESS. OPERATIONS ARE DYNAMICALLY BALANCED DURING EXECUTION, 
+          SO THE ACTUAL BALANCE OF OPERATIONS BETWEEN PROCESSES IS EXPECTED TO BE BETTER THAN THE ESTIMATE
+          PRINTED HERE.
+      (5) THE UPPER LIMIT OF MEMORY THAT CAN BE ALLOCATED BY ABAQUS WILL IN GENERAL DEPEND ON THE VALUE OF
+          THE "MEMORY" PARAMETER AND THE AMOUNT OF PHYSICAL MEMORY AVAILABLE ON THE MACHINE. PLEASE SEE
+          THE "ABAQUS ANALYSIS USER'S MANUAL" FOR MORE DETAILS. THE ACTUAL USAGE OF MEMORY AND OF DISK
+          SPACE FOR SCRATCH DATA WILL DEPEND ON THIS UPPER LIMIT AS WELL AS THE MEMORY REQUIRED TO MINIMIZE
+          I/O. IF THE MEMORY UPPER LIMIT IS GREATER THAN THE MEMORY REQUIRED TO MINIMIZE I/O, THEN THE ACTUAL
+          MEMORY USAGE WILL BE CLOSE TO THE ESTIMATED "MEMORY TO MINIMIZE I/O" VALUE, AND THE SCRATCH DISK
+          USAGE WILL BE CLOSE-TO-ZERO; OTHERWISE, THE ACTUAL MEMORY USED WILL BE CLOSE TO THE PREVIOUSLY
+          MENTIONED MEMORY LIMIT, AND THE SCRATCH DISK USAGE WILL BE ROUGHLY PROPORTIONAL TO THE DIFFERENCE
+          BETWEEN THE ESTIMATED "MEMORY TO MINIMIZE I/O" AND THE MEMORY UPPER LIMIT. HOWEVER ACCURATE
+          ESTIMATE OF THE SCRATCH DISK SPACE IS NOT POSSIBLE.
+      (6) USING "*RESTART, WRITE" CAN GENERATE A LARGE AMOUNT OF DATA WRITTEN IN THE WORK DIRECTORY.
+
+
+                                INCREMENT     1 SUMMARY
+
+
+ TIME INCREMENT COMPLETED   1.00    ,  FRACTION OF STEP COMPLETED   1.00    
+ STEP TIME COMPLETED        1.00    ,  TOTAL TIME COMPLETED         1.00    
+
+
+
+                              J - I N T E G R A L   E S T I M A T E S
+
+   CRACK        CRACKFRONT          C O N T O U R S
+   NAME         NODE SET
+                                     1               2               3               4               5
+                                     6               7               8               9              10
+
+
+   J_OUT_CRACK
+                   -4-               0.9311          0.9603          0.9624          0.9630          0.9636    
+                                     0.9640          0.9644          0.9647          0.9651          0.9645    
+
+
+
+     LABELS REFERENCED IN THE ABOVE TABLE
+
+      -4-      ASSEMBLY__PICKEDSET5                                                            
+
+
+
+                              K   F A C T O R       E S T I M A T E S
+
+   CRACK        CRACKFRONT          C O N T O U R S
+   NAME         NODE SET
+                                     1               2               3               4               5
+                                     6               7               8               9              10
+
+
+   K_OUT_CRACK
+                 -4-        K1:       445.7           469.8           470.3           470.5           470.6    
+                            K2:      7.0682E-03      7.4336E-03      7.4459E-03      7.4503E-03      7.4482E-03
+            MTS   DIRECTION (DEG):    0.000           0.000           0.000           0.000           0.000    
+                        J from Ks:   0.8608          0.9565          0.9586          0.9592          0.9597    
+
+
+                            K1:       470.7           470.8           470.9           471.0           471.4    
+                            K2:      7.4284E-03      7.3750E-03      7.2514E-03      7.2046E-03      7.0992E-03
+            MTS   DIRECTION (DEG):    0.000           0.000           0.000           0.000           0.000    
+                        J from Ks:   0.9602          0.9605          0.9608          0.9612          0.9629    
+
+
+
+
+     LABELS REFERENCED IN THE ABOVE TABLE
+
+      -4-      ASSEMBLY__PICKEDSET5                                                            
+
+
+          THE ANALYSIS HAS BEEN COMPLETED
+
+
+
+                              ANALYSIS COMPLETE
+                              WITH      1 WARNING MESSAGES ON THE DAT FILE
+
+
+
+     JOB TIME SUMMARY
+       USER TIME (SEC)      =     0.20    
+       SYSTEM TIME (SEC)    =     0.20    
+       TOTAL CPU TIME (SEC) =     0.40    
+       WALLCLOCK TIME (SEC) =            1
