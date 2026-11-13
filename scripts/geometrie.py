@@ -59,16 +59,17 @@ def h1_depuis_biais(ratio, longueur=P.RAYON_DISQUE, n=P.N_COUCHES):
 def expression_pression(profil, sigma0):
     """Pression sur les lèvres de la fissure pour représenter une contrainte résiduelle sigma_res.
 
-    Dans Abaqus, une pression positive ferme la fissure : p = -sigma_res (une contrainte résiduelle
-    en traction doit OUVRIR la fissure). Retourne (magnitude, expression) :
-      - profil "uniforme"  : (-sigma0, None)
+    Comme une pression de fluide dans une fissure, une pression POSITIVE sur les lèvres OUVRE la
+    fissure dans Abaqus : p = +sigma_res (une contrainte résiduelle en traction ouvre la fissure et
+    donne K_res > 0). Retourne (magnitude, expression) :
+      - profil "uniforme"  : (+sigma0, None)
       - profil "equilibre" : (1.0, expression en X) ; sigma_res = sigma0 (1 - 6u + 6u^2), u de 0 à 1
         entre la face avant et la face arrière : force et moment nuls sur la section y = 0.
     Les expressions n'utilisent que + - * / (pas de puissance), pour les champs analytiques d'Abaqus.
     """
     if profil == "uniforme":
-        return -float(sigma0), None
+        return float(sigma0), None
     if profil == "equilibre":
         u = "((X-(%r))/%r)" % (float(P.X_FACE_AVANT), float(P.X_FACE_ARRIERE - P.X_FACE_AVANT))
-        return 1.0, "-(%r)*(1-6*%s+6*%s*%s)" % (float(sigma0), u, u, u)
+        return 1.0, "(%r)*(1-6*%s+6*%s*%s)" % (float(sigma0), u, u, u)
     raise ValueError("profil inconnu : %r (attendu : uniforme ou equilibre)" % (profil,))

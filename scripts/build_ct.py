@@ -204,8 +204,8 @@ def _step_et_sorties(m):
 
 def k_res_pression():
     """K_res par superposition : aucune charge externe, pression sur les lèvres de la fissure
-    (p = -sigma_res ; une pression positive ferme la fissure dans Abaqus), pièce libre tenue par deux
-    sommets seulement (réactions attendues nulles), trous libres : pas de couplage."""
+    (p = +sigma_res ; comme une pression de fluide, une pression positive OUVRE la fissure), pièce libre
+    tenue par deux sommets seulement (réactions attendues nulles), trous libres : pas de couplage."""
     m = mdb.models[MODELE]
     asm = m.rootAssembly
     inst = asm.instances[INSTANCE]
