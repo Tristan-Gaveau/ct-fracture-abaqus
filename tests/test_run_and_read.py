@@ -68,3 +68,29 @@ def test_compter_noeuds_elements(tmp_path):
         encoding="utf-8",
     )
     assert compter_noeuds_elements(inp) == (3, 1)
+
+DAT_K_GRAND = """
+                          J - I N T E G R A L     E S T I M A T E S
+ J_OUT_CRACK
+        -8-                     6.380        6.390        6.400        6.410        6.420
+                                6.425        6.430        6.435        6.440        6.445
+
+   LABELS REFERENCED IN THE ABOVE TABLE
+
+                          K   F A C T O R     E S T I M A T E S
+ K_OUT_CRACK
+        -8-        K1:          1217.        1219.        1221.        1222.        1223.
+                   K2:          6.348        25.69        21.26        18.67        16.68
+                   K1:          1.224E+03    1225         1226.        1227.        1228.5
+                   K2:          15.07        13.73        12.71        11.42        2.970
+
+   LABELS REFERENCED IN THE ABOVE TABLE
+"""
+
+
+def test_k1_superieur_a_1000_formats_sans_decimales(tmp_path):
+    p = tmp_path / "grand.dat"
+    p.write_text(DAT_K_GRAND, encoding="utf-8")
+    J, K1, K2 = lire_dat(p)
+    assert list(K1) == [1217.0, 1219.0, 1221.0, 1222.0, 1223.0, 1224.0, 1225.0, 1226.0, 1227.0, 1228.5]
+    assert len(K2) == 10 and len(J) == 10

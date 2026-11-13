@@ -12,7 +12,8 @@ import numpy as np
 
 import params as P
 
-_NOMBRE = re.compile(r"[-+]?\d+\.\d+(?:[Ee][-+]?\d+)?")
+_NOMBRE = re.compile(r"[-+]?\d+\.\d+(?:[Ee][-+]?\d+)?")                 # tableau J : exige le point décimal
+_NOMBRE_VALEUR = re.compile(r"[-+]?\d+(?:\.\d*)?(?:[Ee][-+]?\d+)?")      # après K1: / K2: : tout nombre est une valeur
 
 
 def _nombres(texte):
@@ -20,9 +21,13 @@ def _nombres(texte):
     return [float(x) for x in _NOMBRE.findall(texte)]
 
 
+def _valeurs(texte):
+    """Valeurs numériques d'une ligne K1:/K2: (Abaqus écrit 1217. sans décimales quand K dépasse 1000)."""
+    return [float(x) for x in _NOMBRE_VALEUR.findall(texte)]
+
+
 def _compact(ligne):
     return ligne.replace(" ", "").upper()
-
 
 def lire_dat(chemin, n_contours=P.N_CONTOURS):
     """Retourne (J, K1, K2) : trois tableaux de n_contours valeurs.
@@ -49,9 +54,9 @@ def lire_dat(chemin, n_contours=P.N_CONTOURS):
             J += _nombres(ligne)
         elif mode == "K":
             if "K1:" in ligne:
-                K1 += _nombres(ligne.split("K1:")[1])
+                K1 += _valeurs(ligne.split("K1:")[1])
             elif "K2:" in ligne:
-                K2 += _nombres(ligne.split("K2:")[1])
+                K2 += _valeurs(ligne.split("K2:")[1])
 
     for nom, valeurs in (("J", J), ("K1", K1), ("K2", K2)):
         if len(valeurs) != n_contours:

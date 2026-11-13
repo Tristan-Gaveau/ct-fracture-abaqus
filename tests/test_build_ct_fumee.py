@@ -41,6 +41,10 @@ def faux_abaqus(tmp_path, monkeypatch):
     maillage = types.ModuleType("mesh")
     maillage.ElemType = MagicMock()
     maillage.__all__ = ["ElemType"]
+    for nom in ("part material section assembly step interaction load job sketch").split():
+        vide = types.ModuleType(nom)
+        vide.__all__ = []
+        monkeypatch.setitem(sys.modules, nom, vide)
     regions = types.ModuleType("regionToolset")
     regions.Region = MagicMock()
     for nom, module in (("abaqus", abaqus), ("abaqusConstants", constantes), ("mesh", maillage),
