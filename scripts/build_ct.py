@@ -20,7 +20,18 @@ import sys
 
 from abaqus import *
 from abaqusConstants import *
+# Sans interface (noGUI), Abaqus ne charge que les modules importés ici : chacun ajoute ses commandes
+# au modèle (Coupling vient de interaction, StaticStep de step, ConcentratedForce de load, etc.).
+from part import *
+from material import *
+from section import *
+from assembly import *
+from step import *
+from interaction import *
+from load import *
 from mesh import *            # ElemType
+from job import *
+from sketch import *
 import regionToolset
 
 FICHIER_CAS = "cas_en_cours.json"
