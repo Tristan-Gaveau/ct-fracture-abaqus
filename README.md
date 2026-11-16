@@ -1,6 +1,6 @@
 # ct-fracture-abaqus
 
-![Contrainte S22 sur la déformée (a/W = 0,5)](docs/images/S22_a050.png)
+![Contrainte S22 sur la déformée (a/W = 0,5)](docs/images/S22_a050_v2.png)
 ![Ouverture de la fissure](docs/images/ouverture_fissure.gif)
 
 Facteur d'intensité de contrainte K d'une éprouvette CT en acier 300M (Abaqus, intégrale J), comparé à la formule
