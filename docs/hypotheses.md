@@ -12,8 +12,9 @@ Le contour 1 est écarté (peu précis). On rapporte aussi la dispersion de J (c
 - Repère : origine sur la ligne de chargement ; face avant à x = −12,5 mm ; trous de rayon 6,25 mm
   centrés en (0 ; ±13,75) ; fissure le long de y = 0 de la face avant à x = a.
 - L'entaille mécanique est modélisée comme une fissure de largeur nulle (seam) jusqu'à la face avant.
-- Trous : couplage cinématique (U1, U2) sur le bord. Il rigidifie le bord du trou. Effet sur K non vérifié :
-  hypothèse possible pour l'écart aux petites fissures (voir plus bas), à tester avec un couplage distribué.
+- Trous : couplage cinématique (U1, U2) sur le bord. Test de sensibilité à a/W = 0,30 : couplage
+  distribuant (CT_COUPLAGE=DISTRIBUTING) à la place, K passe de 330,7 à 330,2 MPa√mm (−0,15 %).
+  Le couplage n'explique donc pas l'écart de 4,0 % avec ASTM E399 aux petites fissures.
 - Éléments : CPE8R (quadrilatères) et CPE6 (triangles). Jamais CPE6M (mélange refusé par Abaqus), jamais CPS.
 - Pointe : nœuds milieux à 0,5 (sans singularité), vérifié sur le maillage du script (nœuds au-dessus de la
   pointe : 0 ; 0,136 ; 0,273 ; 0,432 mm…). Le modèle manuel n'a pas été vérifié sur ce point.
@@ -102,3 +103,9 @@ Le contour 1 est écarté (peu précis). On rapporte aussi la dispersion de J (c
 - Deux éléments sur 240 du calcul manuel sont signalés « distorted » par Abaqus (ensemble WarnElemDistorted) :
   avertissement, pas une erreur. À vérifier pour le maillage du script.
 - Learning Edition : 1 000 nœuds maximum.
+- Écart FE/ASTM E399 aux petites fissures : +4,0 % à a/W = 0,30 et +2,1 % à 0,35 (< 1 % pour a/W ≥ 0,4).
+  Causes testées et écartées à a/W = 0,30 : couplage cinématique remplacé par un couplage
+  distribuant (K −0,15 %) ; disque de pointe réduit de 6 à 4 mm (K +0,06 %) ;
+  taille du premier élément (voir convergence). Cause probable, non testée : chargement sur tout le bord
+  du trou au lieu d'un contact de goupille sur la moitié côté ligament.
+  Le critère « écart < 2 % » est donc tenu pour a/W ≥ 0,4 seulement.

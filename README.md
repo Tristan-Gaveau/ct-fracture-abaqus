@@ -5,8 +5,8 @@ ASTM E399, puis durée de vie en propagation de fissure (lois de Paris et de Wal
 contrainte résiduelle par superposition. Tout est scripté en Python (construction du modèle, calculs, lecture,
 figures) et testé.
 
-**État :** calculs terminés. Deux paramètres restent sans source, et le README le dit : l'exposant γ de Walker et la
-ténacité K_Ic.
+**État :** calculs terminés. Un paramètre reste sans source, et le README le dit : l'exposant γ de Walker. La ténacité
+K_Ic vient de la NASA TP-1288 (valeur conservative, plage documentée).
 
 ## Résultats clés
 
@@ -14,8 +14,9 @@ ténacité K_Ic.
 |---|---|
 | K éléments finis, a/W = 0,5 | **17,22 MPa√m**, soit **−0,33 %** par rapport à l'ASTM (17,28) |
 | Convergence de maillage | K varie de **0,06 %** pour un premier élément de 0,27 à 0,05 mm (critère fixé à 0,2 %, atteint) |
-| K(a), 9 longueurs de fissure | écart à l'ASTM **sous 1 %** pour a/W de 0,4 à 0,7 ; +4,0 % à 0,3 et +2,1 % à 0,35 (cause non établie) |
+| K(a), 9 longueurs de fissure | écart à l'ASTM **sous 1 %** pour a/W de 0,4 à 0,7 ; +4,0 % à 0,3 et +2,1 % à 0,35 (cause non établie, trois causes écartées) |
 | Qualité des calculs | J indépendant du contour à 0,3 % près, K2/K1 ≤ 0,04 % |
+| Marge à la rupture | K_max/K_Ic = **0,62** à 35 mm (K_Ic = 62,6 MPa√m) ; 0,44 avec la borne haute de la plage (86,8) |
 | Durée de vie, 300M, R = 0,1, a de 20 à 35 mm | **2,5 × 10⁵ cycles** ; K éléments finis et K ASTM donnent le même N à 0,3 % près |
 | Sensibilité au paramètre m de la loi de Paris | N varie d'un **facteur 15** entre m = 2,17 et m = 3,17 ; C ±20 % donne N de +25 % à −17 % |
 
@@ -49,6 +50,10 @@ ouverte : l'effet vient de γ. Une compression ralentit quand même la fissure p
 - **K officiel** : moyenne, sur les contours 3 à 10, de √(J·E'). Règle fixée avant l'étude, appliquée à tous les calculs.
 - **Propagation** : Paris `da/dN = C·ΔK^m` avec C = 3,121 × 10⁻¹¹ (m/cycle, MPa√m) et m = 2,672, ajustés sur la figure
   2.3.1.4.9 du MIL-HDBK-5J (15 points numérisés, dispersion d'un facteur 1,07). Walker avec exposant γ pour l'effet de R.
+- **Ténacité** : K_Ic = 62,6 MPa√m, NASA TP-1288 (Youngblood & Raghavan, 1978), table I, barre de 0,5 in en 300M,
+  austénitisation 1144 K et revenu 589 K (σy = 1624 MPa). Ligne la plus proche de Fty = 230 ksi et Ftu = 280 ksi avec la
+  plus faible ténacité. Plage des lignes comparables : 62,6 à 86,8 MPa√m. Critère E399 : 2,5 (K_Ic/σy)² = 3,7 mm,
+  très inférieur à B = 25 mm et au ligament.
 - **Contraintes résiduelles** : profil σ0(1 − 6u + 6u²) sur la largeur (force et moment nuls), pression sur les lèvres,
   pièce libre sans goupilles.
 
@@ -56,7 +61,7 @@ Détails, règles et décisions : `docs/hypotheses.md`.
 
 ## Validation
 
-Plus de 60 tests automatiques (pytest). Ce que la vérification a révélé en cours de projet :
+69 tests automatiques (pytest). Ce que la vérification a révélé en cours de projet :
 
 - **Épaisseur** : K dépend de P/B. Appliquer 10 000 N sur un modèle d'épaisseur 1 mm donnerait un K 25 fois trop grand ;
   la charge du modèle est donc 400 N/mm.
@@ -68,26 +73,31 @@ Plus de 60 tests automatiques (pytest). Ce que la vérification a révélé en c
   test de signe, d'antisymétrie et de linéarité l'a détecté avant tout calcul de K_res(a).
 - **Paramètres de matériau** : C et m viennent d'une figure du handbook numérisée, avec contrôle de la dispersion, d'un
   point aberrant et de la plage de ΔK couverte. Des valeurs non vérifiables (γ confondu avec un facteur géométrique, vitesses
-  2 à 5 fois plus faibles que la figure) ont été écartées.
+  2 à 5 fois plus faibles que la figure) ont été écartées. K_Ic a été relu ligne par ligne dans la table source : une
+  première association valeur/traitement thermique, faite par extraction automatique, était fausse.
+- **Unités de K_Ic** : le script de contrôle `verif_kic.py` a d'abord affiché K_max = 0 (facteur d'unité faux) ; il
+  refuse maintenant tout K_max hors de 30 à 50 MPa√m.
 - **Script contre calcul manuel** : le script reproduit le modèle construit à la main (K à +0,44 %, nœuds à +2,5 %) et le
   dépasse en régularité (dispersion de J 0,2 % contre 2,6 %, K2/K1 nul).
 
 ## Limites
 
-- **Petites fissures** : K éléments finis dépasse l'ASTM de +4,0 % (a/W = 0,3) et +2,1 % (0,35). Hypothèse non testée :
-  le couplage cinématique des trous (bord rigide). La propagation est donc intégrée de a/W = 0,4 à 0,7 (20 à 35 mm) ; en
-  intégrant dès 15 mm, N éléments finis s'écarterait de −3,9 % de N ASTM.
-**Plage de ΔK.** Les points numérisés (MIL-HDBK-5J, fig. 2.3.1.4.9) couvrent ΔK = 10 à 28,9 ksi√in
-(11,0 à 31,8 MPa√m). Avec R = 0,1, l'étude va jusqu'à ΔK = 34,7 MPa√m (31,6 ksi√in) :
-le dernier tronçon, de 28,9 à 31,6 ksi√in (environ 9 % de ΔK), est une **extrapolation** de la droite de Paris.
-Près de la rupture da/dN s'accélère : l'extrapolation sous-estime la vitesse et
-**surestime la durée de vie** (côté non conservatif). Ordre de grandeur de l'incertitude :
-étude de sensibilité à m, ci-dessus.
+- **Petites fissures** : K éléments finis dépasse l'ASTM de +4,0 % (a/W = 0,3) et +2,1 % (0,35). Trois causes testées et
+  écartées à a/W = 0,3 : couplage cinématique remplacé par un couplage distribuant (K −0,15 %), disque de pointe réduit
+  de 6 à 4 mm (K +0,06 %), taille du premier élément (convergence). Cause probable, non testée : chargement sur tout le
+  bord du trou au lieu d'un contact de goupille sur la moitié côté ligament. La propagation est donc intégrée de a/W = 0,4
+  à 0,7 (20 à 35 mm) ; en intégrant dès 15 mm, N éléments finis s'écarterait de −3,9 % de N ASTM.
+- **Plage de ΔK** : les points numérisés (MIL-HDBK-5J, fig. 2.3.1.4.9) couvrent ΔK = 10 à 28,9 ksi√in
+  (11,0 à 31,8 MPa√m). Avec R = 0,1, l'étude va jusqu'à ΔK = 34,7 MPa√m (31,6 ksi√in) : le dernier tronçon, de 28,9 à
+  31,6 ksi√in (environ 9 % de ΔK), est une **extrapolation** de la droite de Paris. Près de la rupture da/dN
+  s'accélère : l'extrapolation sous-estime la vitesse et **surestime la durée de vie** (côté non conservatif).
+  Ordre de grandeur de l'incertitude : étude de sensibilité à m, ci-dessus.
 - **Loi de Paris** : la pente locale baisse de 2,69 (ΔK de 10 à 18 ksi√po) à 2,28 (18 à 29) ; un seul exposant est une
   approximation. Les données regroupent R = 0,08 à 0,5 : l'effet de R n'est pas séparé, d'où γ non sourcé. Zone de
   propagation stable uniquement (ni seuil ΔK_th, ni rupture finale).
-- **K_Ic** : non renseigné (aucune source retenue). K_max atteint 38,4 MPa√m à 35 mm ; la zone plastique d'Irwin
-  est d'environ 0,03 mm, donc l'élasticité linéaire est raisonnable.
+- **K_Ic** : valeur conservative d'une table de barres de 0,5 in ; le traitement thermique de la pièce réelle est
+  inconnu, d'où la plage 62,6 à 86,8 MPa√m. K_max atteint 38,4 MPa√m (éléments finis) à 35 mm ; la zone plastique
+  d'Irwin est d'environ 0,03 mm, donc l'élasticité linéaire est raisonnable.
 - **Contraintes résiduelles** : profil et amplitude hypothétiques, pas une mesure. K2/K1 vaut ±3 % en mode K_res (0 % en
   mode appliqué), cause non établie. Pas de contact entre les lèvres : un K_res négatif n'est pas physique tel quel, la
   fermeture est simplifiée (K_min = 0).
@@ -107,9 +117,11 @@ python scripts/k_vs_a.py                            # K(a), 9 longueurs de fissu
 python scripts/k_res_vs_a.py                        # K_res(a), 7 longueurs
 python scripts/ajuster_paris.py results/raw/mil_hdbk_fig_2_3_1_4_9.csv   # C et m
 python scripts/paris.py                             # durées de vie
+python scripts/verif_kic.py                         # K_max / K_Ic
 ```
 
 Les calculs Abaqus se font dans `C:\abaqus_calculs` (variable d'environnement `CT_CALCULS` pour changer), hors du dépôt.
+Pour tester le couplage distribuant des trous : variable d'environnement `CT_COUPLAGE=DISTRIBUTING` avant `run_case.py`.
 
 ## Structure
 
@@ -122,13 +134,15 @@ docs/      hypotheses.md (règles et décisions), verifications_environnement.md
 
 ## Pour aller plus loin
 
-Tester un couplage distribué des trous (origine possible de l'écart aux petites fissures), comparer à un autre solveur
-(Code_Aster), un modèle 3D, un profil de contraintes résiduelles mesuré, une source pour γ et pour K_Ic.
+Modéliser un contact de goupille sur la moitié du trou (origine possible de l'écart aux petites fissures), comparer à
+un autre solveur (Code_Aster), un modèle 3D, un profil de contraintes résiduelles mesuré, une source pour γ, le
+traitement thermique réel pour K_Ic, des points de la courbe de Paris au-delà de ΔK = 28,9 ksi√in.
 
 ## Références
 
 - MIL-HDBK-5J, *Metallic Materials and Elements for Aerospace Vehicle Structures*, 31 janvier 2003 : table 2.3.1.0(f1)
   (propriétés du 300M) et figure 2.3.1.4.9, p. 2-64 (propagation de fissure en fatigue du 300M).
+- NASA TP-1288, Youngblood & Raghavan (1978) : ténacité du 300M selon le traitement thermique, table I.
 - ASTM E399 (géométrie CT, fonction f(a/W)).
 - T. L. Anderson, *Fracture Mechanics: Fundamentals and Applications*.
 - P. Paris, F. Erdogan (1963), « A Critical Analysis of Crack Propagation Laws ».
