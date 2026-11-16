@@ -52,4 +52,5 @@ R_CHARGE = 0.1                          # P_min / P_max
 GAMMA_WALKER = 0.5                      # exposant de Walker : NON SOURCÉ, traité comme paramètre (voir paris.py)
 A_INITIAL_SUR_W = 0.40                  # début de l'intégration : K(a) FE à +/-1 % de l'ASTM à partir de a/W = 0,4
 A_FINAL_SUR_W = 0.70                    # fin de l'intégration
-K_IC = None                             # MPa*sqrt(m) : À RENSEIGNER (source citée) pour contrôler K_max < K_Ic
+K_IC = 62.6                # MPa√m, NASA TP-1288 Table I : 1144 K / 589 K, sigma_y = 1624 MPa
+K_IC_PLAGE = (62.6, 86.8)  # lignes de la table proches de Fty 230 / Ftu 280 ksi

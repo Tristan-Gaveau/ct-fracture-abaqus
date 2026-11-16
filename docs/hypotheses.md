@@ -85,7 +85,15 @@ Le contour 1 est écarté (peu précis). On rapporte aussi la dispersion de J (c
   aucun effet (DK inchangé) ; une compression ralentit quand même la fissure par fermeture simplifiée.
 - N varie d'un facteur 15 entre m = 2,5 et m = 3,5 (C = 1e-11) : DK est élevé à la puissance m.
 - Zone de propagation stable seulement : ni seuil DK_th, ni rupture finale.
-- À contrôler : K_max < K_Ic sur tout l'intervalle de a (K_Ic à renseigner dans params.py).
+- K_Ic = 62,6 MPa√m : NASA TP-1288 (Youngblood & Raghavan, 1978), Table I, barre de 0,5 in en 300M,
+  austénitisation 1144 K, revenu 589 K (σy = 1624 MPa, σu = 1894 MPa). Ligne la plus proche de
+  Fty = 230 ksi / Ftu = 280 ksi avec la plus faible ténacité : choix conservatif.
+  Plage des lignes comparables : 62,6 à 86,8 MPa√m.
+  K_max/K_Ic = 0,62 (borne basse) à 0,44 (borne haute) à a/W = 0,7.
+  Critère E399 : 2,5 (K_Ic/σy)² = 3,7 mm, très inférieur à B = 25 mm et au ligament.
+  Limite : traitement thermique de ton matériau inconnu ; la table donne une barre de 0,5 in.
+  - Extrapolation de la loi de Paris de ΔK = 28,9 à 31,6 ksi√in (fin de fissuration, a ≈ 34 à 35 mm) :
+  biais non conservatif (durée de vie surestimée), non quantifié faute de données.
 
 ## Limites
 - 2D, pas d'effet de bord d'épaisseur ; pas de plasticité en pointe ; pas de fermeture de fissure réelle.

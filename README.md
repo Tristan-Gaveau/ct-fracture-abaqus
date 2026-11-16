@@ -77,8 +77,12 @@ Plus de 60 tests automatiques (pytest). Ce que la vérification a révélé en c
 - **Petites fissures** : K éléments finis dépasse l'ASTM de +4,0 % (a/W = 0,3) et +2,1 % (0,35). Hypothèse non testée :
   le couplage cinématique des trous (bord rigide). La propagation est donc intégrée de a/W = 0,4 à 0,7 (20 à 35 mm) ; en
   intégrant dès 15 mm, N éléments finis s'écarterait de −3,9 % de N ASTM.
-- **Plage de ΔK** : les données numérisées couvrent 11,0 à 31,8 MPa√m, l'étude va jusqu'à 34,7 ; l'extrapolation
-  concerne 0,9 % des cycles (de 34,2 à 35 mm), et N varie de moins de 1 % même avec une vitesse 5 fois plus grande.
+**Plage de ΔK.** Les points numérisés (MIL-HDBK-5J, fig. 2.3.1.4.9) couvrent ΔK = 10 à 28,9 ksi√in
+(11,0 à 31,8 MPa√m). Avec R = 0,1, l'étude va jusqu'à ΔK = 34,7 MPa√m (31,6 ksi√in) :
+le dernier tronçon, de 28,9 à 31,6 ksi√in (environ 9 % de ΔK), est une **extrapolation** de la droite de Paris.
+Près de la rupture da/dN s'accélère : l'extrapolation sous-estime la vitesse et
+**surestime la durée de vie** (côté non conservatif). Ordre de grandeur de l'incertitude :
+étude de sensibilité à m, ci-dessus.
 - **Loi de Paris** : la pente locale baisse de 2,69 (ΔK de 10 à 18 ksi√po) à 2,28 (18 à 29) ; un seul exposant est une
   approximation. Les données regroupent R = 0,08 à 0,5 : l'effet de R n'est pas séparé, d'où γ non sourcé. Zone de
   propagation stable uniquement (ni seuil ΔK_th, ni rupture finale).
