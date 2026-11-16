@@ -1,60 +1,131 @@
 # ct-fracture-abaqus
 
-Calcul du facteur d'intensité de contrainte K sur une éprouvette CT (Abaqus, intégrale J),
-comparaison à la formule ASTM E399, puis prédiction de durée de vie en propagation
-(loi de Paris, puis loi de Walker avec contraintes résiduelles).
+Facteur d'intensité de contrainte K d'une éprouvette CT en acier 300M (Abaqus, intégrale J), comparé à la formule
+ASTM E399, puis durée de vie en propagation de fissure (lois de Paris et de Walker), avec un bonus sur l'effet d'une
+contrainte résiduelle par superposition. Tout est scripté en Python (construction du modèle, calculs, lecture,
+figures) et testé.
 
-**État : en cours.** Les chiffres marqués « à compléter » ne sont pas encore mesurés.
+**État :** calculs terminés. Deux paramètres restent sans source, et le README le dit : l'exposant γ de Walker et la
+ténacité K_Ic.
 
 ## Résultats clés
-- K éléments finis contre formule (a/W = 0,5) : **−0,33 %** (17,22 contre 17,28 MPa√m), maillage convergé à la pointe
-- Convergence de maillage : K stable à 0,06 % près pour un premier élément de 0,27 à 0,05 mm (4 maillages, critère 0,2 %)
-- K(a) pour 9 longueurs de fissure : écart à l'ASTM inférieur à 1 % de a/W = 0,4 à 0,7 ; +4,0 % et +2,1 % à a/W = 0,3 et 0,35 (cause non établie), d'où une propagation intégrée de 20 à 35 mm
-- Durée de vie (300M, C et m ajustés sur la figure 2.3.1.4.9 du MIL-HDBK-5J, R = 0,1) : 2,5 × 10⁵ cycles de 20 à 35 mm, identique à 0,3 % près avec K éléments finis ou K ASTM ; N varie d'un facteur 15 pour m ± 0,5 ; effet des contraintes résiduelles (σ0 et γ hypothétiques) de −28 % à +41 % pour γ = 0,5, nul en traction pour γ = 1
-- Contraintes résiduelles (bonus, profil et amplitude HYPOTHÉTIQUES) : K_res par superposition, +6,9 MPa√m à 20 mm pour σ0 = 100 MPa, décroissant et nul vers 34 mm ; effet sur la durée de vie (Walker, C, m, γ illustratifs) de −32 % (σ0 = +100 MPa) à +237 % (σ0 = −100 MPa)
 
-## Modèle
-Éprouvette CT, W = 50 mm, B = 25 mm, a/W = 0,5. Déformations planes, élasticité linéaire, acier
-(E = 210 GPa, nu = 0,3). Charge 10 kN (400 N par mm d'épaisseur dans le modèle 2D). Maillage CPE8R,
-disque de pointe de 10 couches avec biais radial. Détails et hypothèses : `docs/hypotheses.md`.
+| Résultat | Valeur |
+|---|---|
+| K éléments finis, a/W = 0,5 | **17,22 MPa√m**, soit **−0,33 %** par rapport à l'ASTM (17,28) |
+| Convergence de maillage | K varie de **0,06 %** pour un premier élément de 0,27 à 0,05 mm (critère fixé à 0,2 %, atteint) |
+| K(a), 9 longueurs de fissure | écart à l'ASTM **sous 1 %** pour a/W de 0,4 à 0,7 ; +4,0 % à 0,3 et +2,1 % à 0,35 (cause non établie) |
+| Qualité des calculs | J indépendant du contour à 0,3 % près, K2/K1 ≤ 0,04 % |
+| Durée de vie, 300M, R = 0,1, a de 20 à 35 mm | **2,5 × 10⁵ cycles** ; K éléments finis et K ASTM donnent le même N à 0,3 % près |
+| Sensibilité au paramètre m de la loi de Paris | N varie d'un **facteur 15** entre m = 2,17 et m = 3,17 ; C ±20 % donne N de +25 % à −17 % |
 
-## Méthode
-1. Formule analytique (`scripts/k_analytique.py`)
-2. Modèle éléments finis et intégrale J, 10 contours (`scripts/build_ct.py`, `scripts/run_case.py`)
-3. K officiel = moyenne des contours 3 à 10 de sqrt(J·E') (`scripts/run_and_read.py`)
-4. Convergence de maillage (`scripts/convergence.py`)
-5. K(a) (`scripts/k_vs_a.py`)
-6. Propagation (`scripts/paris.py`)
+Courbe K(a) : `results/figures/K_vs_a.png`. Convergence : `results/figures/convergence_maillage.png`. Propagation :
+`results/figures/a_de_N.png`.
 
-## Structure
-```
-scripts/   code (params.py : paramètres uniques ; chemins.py : chemins)
-tests/     tests automatiques (pytest)
-results/   CSV, figures, fichiers .dat bruts
-docs/      hypotheses.md, verifications_environnement.md
-```
+### Effet d'une contrainte résiduelle (bonus, profil et amplitude hypothétiques)
 
-## Utilisation
+K_res est calculé par superposition (pression sur les lèvres de la fissure, pièce libre). Pour un profil auto-équilibré
+de 100 MPa d'amplitude, K_res vaut **+6,9 MPa√m à 20 mm** (+53 % de K appliqué), décroît et s'annule vers 34 mm.
+
+Variation du nombre de cycles par rapport à σ0 = 0, selon l'exposant de Walker γ (**aucune source ne le fixe** : il
+est donc étudié de 0,5 à 1) :
+
+| γ | σ0 = −100 MPa | σ0 = −50 | σ0 = +50 | σ0 = +100 |
+|---|---|---|---|---|
+| 0,50 | +181 % | +41 % | −17 % | −28 % |
+| 0,75 | +162 % | +32 % | −9 % | −16 % |
+| 1,00 | +145 % | +24 % | 0 % | 0 % |
+
+Pour γ = 1 (loi de Paris pure), une contrainte résiduelle en traction n'a aucun effet tant que la fissure reste
+ouverte : l'effet vient de γ. Une compression ralentit quand même la fissure par fermeture (K_min ramené à 0).
+
+## Modèle et méthode
+
+- **Éprouvette** : CT, W = 50 mm, B = 25 mm, a/W de 0,3 à 0,7, charge 10 kN (400 N par mm d'épaisseur dans le modèle 2D).
+- **Matériau** : acier 300M (Ftu = 280 ksi, Fty = 230 ksi, MIL-HDBK-5J, table 2.3.1.0(f1)). Le modèle utilise
+  E = 210 GPa et ν = 0,30 (acier générique) ; le handbook donne E ≈ 200 GPa et ν = 0,32.
+- **Éléments finis** : Abaqus Learning Edition 2026, déformations planes, élasticité linéaire, CPE8R et CPE6, disque de
+  10 couches autour de la pointe avec biais radial, environ 820 nœuds (807 à 831 ; limite de la Learning Edition : 1 000).
+- **K officiel** : moyenne, sur les contours 3 à 10, de √(J·E'). Règle fixée avant l'étude, appliquée à tous les calculs.
+- **Propagation** : Paris `da/dN = C·ΔK^m` avec C = 3,121 × 10⁻¹¹ (m/cycle, MPa√m) et m = 2,672, ajustés sur la figure
+  2.3.1.4.9 du MIL-HDBK-5J (15 points numérisés, dispersion d'un facteur 1,07). Walker avec exposant γ pour l'effet de R.
+- **Contraintes résiduelles** : profil σ0(1 − 6u + 6u²) sur la largeur (force et moment nuls), pression sur les lèvres,
+  pièce libre sans goupilles.
+
+Détails, règles et décisions : `docs/hypotheses.md`.
+
+## Validation
+
+Plus de 60 tests automatiques (pytest). Ce que la vérification a révélé en cours de projet :
+
+- **Épaisseur** : K dépend de P/B. Appliquer 10 000 N sur un modèle d'épaisseur 1 mm donnerait un K 25 fois trop grand ;
+  la charge du modèle est donc 400 N/mm.
+- **Type d'élément** : un maillage mêlant des triangles CPE6M et des quadrilatères CPE8R est refusé par Abaqus ; les
+  triangles sont des CPE6. Un test vérifie les types.
+- **Format du .dat** : au-dessus de K = 1 000 MPa√mm, Abaqus écrit K1 sans décimales (`1210.`) ; le lecteur a d'abord
+  ignoré ces valeurs. Test dédié ajouté.
+- **Signe de K_res** : le premier essai avait le mauvais signe (une pression positive ouvre la fissure dans Abaqus). Un
+  test de signe, d'antisymétrie et de linéarité l'a détecté avant tout calcul de K_res(a).
+- **Paramètres de matériau** : C et m viennent d'une figure du handbook numérisée, avec contrôle de la dispersion, d'un
+  point aberrant et de la plage de ΔK couverte. Des valeurs non vérifiables (γ confondu avec un facteur géométrique, vitesses
+  2 à 5 fois plus faibles que la figure) ont été écartées.
+- **Script contre calcul manuel** : le script reproduit le modèle construit à la main (K à +0,44 %, nœuds à +2,5 %) et le
+  dépasse en régularité (dispersion de J 0,2 % contre 2,6 %, K2/K1 nul).
+
+## Limites
+
+- **Petites fissures** : K éléments finis dépasse l'ASTM de +4,0 % (a/W = 0,3) et +2,1 % (0,35). Hypothèse non testée :
+  le couplage cinématique des trous (bord rigide). La propagation est donc intégrée de a/W = 0,4 à 0,7 (20 à 35 mm) ; en
+  intégrant dès 15 mm, N éléments finis s'écarterait de −3,9 % de N ASTM.
+- **Plage de ΔK** : les données numérisées couvrent 11,0 à 31,8 MPa√m, l'étude va jusqu'à 34,7 ; l'extrapolation
+  concerne 0,9 % des cycles (de 34,2 à 35 mm), et N varie de moins de 1 % même avec une vitesse 5 fois plus grande.
+- **Loi de Paris** : la pente locale baisse de 2,69 (ΔK de 10 à 18 ksi√po) à 2,28 (18 à 29) ; un seul exposant est une
+  approximation. Les données regroupent R = 0,08 à 0,5 : l'effet de R n'est pas séparé, d'où γ non sourcé. Zone de
+  propagation stable uniquement (ni seuil ΔK_th, ni rupture finale).
+- **K_Ic** : non renseigné (aucune source retenue). K_max atteint 38,4 MPa√m à 35 mm ; la zone plastique d'Irwin
+  est d'environ 0,03 mm, donc l'élasticité linéaire est raisonnable.
+- **Contraintes résiduelles** : profil et amplitude hypothétiques, pas une mesure. K2/K1 vaut ±3 % en mode K_res (0 % en
+  mode appliqué), cause non établie. Pas de contact entre les lèvres : un K_res négatif n'est pas physique tel quel, la
+  fermeture est simplifiée (K_min = 0).
+- **Modèle** : 2D en déformations planes, pas de plasticité en pointe, Learning Edition limitée à 1 000 nœuds.
+
+## Reproduire
+
+Prérequis : Abaqus (testé avec la Learning Edition 2026), Python 3 avec numpy, matplotlib et pytest.
+
 ```
 pip install -r requirements.txt
 python -m pytest
 python scripts/run_case.py 0.5 4 ct_a050            # un cas (automatique)
 python scripts/run_case.py 0.5 4 ct_a050 --manuel   # build_ct.py lancé à la main dans CAE
-python scripts/convergence.py
-python scripts/k_vs_a.py
-python scripts/paris.py
+python scripts/convergence.py                       # convergence de maillage
+python scripts/k_vs_a.py                            # K(a), 9 longueurs de fissure
+python scripts/k_res_vs_a.py                        # K_res(a), 7 longueurs
+python scripts/ajuster_paris.py results/raw/mil_hdbk_fig_2_3_1_4_9.csv   # C et m
+python scripts/paris.py                             # durées de vie
 ```
-Les calculs Abaqus se font dans `C:\abaqus_calculs` (variable `CT_CALCULS` pour changer), hors du dépôt.
 
-## Limites
-- 2D déformations planes ; pas de plasticité en pointe ; pas de fermeture de fissure réelle
-- Paris et Walker : zone de propagation stable seulement
-- Learning Edition : 1 000 nœuds maximum
-- Couplage cinématique sur les trous (bord rigide)
+Les calculs Abaqus se font dans `C:\abaqus_calculs` (variable d'environnement `CT_CALCULS` pour changer), hors du dépôt.
+
+## Structure
+
+```
+scripts/   code (params.py : paramètres uniques ; chemins.py : chemins ; build_ct.py : modèle Abaqus)
+tests/     tests automatiques (pytest)
+results/   CSV, figures, .dat bruts (results/raw), tableaux de résultats en .md
+docs/      hypotheses.md (règles et décisions), verifications_environnement.md, depannage_build_ct.md
+```
 
 ## Pour aller plus loin
-Code_Aster (comparaison de solveurs), 3D, profil de contraintes résiduelles mesuré.
+
+Tester un couplage distribué des trous (origine possible de l'écart aux petites fissures), comparer à un autre solveur
+(Code_Aster), un modèle 3D, un profil de contraintes résiduelles mesuré, une source pour γ et pour K_Ic.
 
 ## Références
-ASTM E399 ; T. L. Anderson, *Fracture Mechanics: Fundamentals and Applications* ;
-Paris et Erdogan (1963) ; documentation Abaqus (Contour integral evaluation).
+
+- MIL-HDBK-5J, *Metallic Materials and Elements for Aerospace Vehicle Structures*, 31 janvier 2003 : table 2.3.1.0(f1)
+  (propriétés du 300M) et figure 2.3.1.4.9, p. 2-64 (propagation de fissure en fatigue du 300M).
+- ASTM E399 (géométrie CT, fonction f(a/W)).
+- T. L. Anderson, *Fracture Mechanics: Fundamentals and Applications*.
+- P. Paris, F. Erdogan (1963), « A Critical Analysis of Crack Propagation Laws ».
+- Documentation Abaqus : évaluation des intégrales de contour (*Contour integral evaluation*).
