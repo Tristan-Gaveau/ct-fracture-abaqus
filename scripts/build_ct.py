@@ -248,9 +248,14 @@ def couplages_step_charges():
         if len(bord) == 0:
             raise RuntimeError("Bord du trou %s introuvable" % nom)
         asm.Surface(side1Edges=bord, name="S_TROU_" + nom)
+        type_cpl = KINEMATIC
+        options = {}
+        if os.environ.get("CT_COUPLAGE") == "DISTRIBUTING":   # test de sensibilité (a/W = 0,30)
+            type_cpl = DISTRIBUTING
+            options = {"weightingMethod": UNIFORM}
         m.Coupling(name="CPL_" + nom, controlPoint=asm.sets["RP_" + nom],
                    surface=asm.surfaces["S_TROU_" + nom], influenceRadius=WHOLE_SURFACE,
-                   couplingType=KINEMATIC, localCsys=None, u1=ON, u2=ON, ur3=OFF)
+                   couplingType=type_cpl, localCsys=None, u1=ON, u2=ON, ur3=OFF, **options)
 
     _step_et_sorties(m)
 

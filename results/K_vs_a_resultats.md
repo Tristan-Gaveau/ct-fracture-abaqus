@@ -18,11 +18,15 @@ Qualité du calcul sur toute la plage : 807 à 831 nœuds, dispersion de J de 0,
 - De a/W = 0,4 à 0,7, l'écart à l'ASTM est inférieur à 1 %.
 - À a/W = 0,3 et 0,35, K éléments finis dépasse l'ASTM de +4,0 % et +2,1 %.
 
-## Hypothèse sur l'écart (non vérifiée)
-Le couplage cinématique rend le bord du trou rigide ; quand la fissure est courte, la pointe est plus
-proche des trous et l'effet de ce modèle de chargement est plus fort. Un test avec un couplage
-distribué permettrait de le vérifier.
+## Écart aux petites fissures (a/W = 0,3 et 0,35)
+Trois causes ont été testées à a/W = 0,3 et écartées :
+- couplage cinématique remplacé par un couplage distribuant : K −0,15 % ;
+- disque de pointe réduit de 6 à 4 mm : K +0,06 % ;
+- taille du premier élément : voir `convergence_resultats.md`.
+
+Cause probable, non testée : chargement appliqué sur tout le bord du trou, au lieu d'un contact de goupille sur la
+moitié côté ligament. L'écart reste donc sans cause établie.
 
 ## Décision (prise après avoir vu l'écart)
 La propagation (Paris, Walker) est intégrée de a/W = 0,4 à 0,7 (20 à 35 mm). Effet sur la durée de vie
-(C et m illustratifs) : en intégrant de 15 mm, N éléments finis / N ASTM = −3,9 % ; de 20 mm, +0,3 %.
+(C et m ajustés sur le MIL-HDBK-5J) : en intégrant dès 15 mm, N éléments finis / N ASTM = −3,9 % ; dès 20 mm, +0,32 %.

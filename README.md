@@ -150,3 +150,7 @@ traitement thermique réel pour K_Ic, des points de la courbe de Paris au-delà 
 - T. L. Anderson, *Fracture Mechanics: Fundamentals and Applications*.
 - P. Paris, F. Erdogan (1963), « A Critical Analysis of Crack Propagation Laws ».
 - Documentation Abaqus : évaluation des intégrales de contour (*Contour integral evaluation*).
+
+## Licence
+
+MIT, voir `LICENSE`.

@@ -26,7 +26,7 @@ P_PAR_MM = P_REEL / B_REEL              # 400 N par mm d'épaisseur
 
 # --- Maillage ---
 TAILLE_GLOBALE = 5.0                    # mm, zone grossière
-RAYON_DISQUE = 6.0                      # mm, disque autour de la pointe
+RAYON_DISQUE = 6.0                    # mm, disque autour de la pointe
 N_COUCHES = 10                          # couches radiales = nombre de contours
 N_ARC = 2                               # éléments par arc de 90 degrés
 RATIO_BIAIS = 4.0                       # plus grand élément / plus petit, vers la pointe
