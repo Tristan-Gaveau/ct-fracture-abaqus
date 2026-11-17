@@ -1,0 +1,104 @@
+# -*- coding: utf-8 -*-
+# Code_Aster 17.4 : K de l'éprouvette CT par G-theta (CALC_G, option CALC_K_G), 2D déformations planes.
+# Unités : mm, N, MPa. Épaisseur du modèle = 1 mm, donc la charge est 400 N/mm et G sort en N/mm.
+# Les jetons @...@ sont remplacés par scripts/aster/preparer_cas.py.
+import math
+
+DEBUT()
+
+E_YOUNG = 210000.0
+NU = 0.3
+E_PRIME = E_YOUNG / (1.0 - NU ** 2)
+P_PAR_MM = 400.0
+RAYON = @RAYON@            # rayon du disque de pointe (mm)
+N_COUCHES = @NCOUCHES@     # éléments radiaux dans le disque
+RATIO = @RATIO@            # plus grand / plus petit élément
+A_MM = @A@                 # longueur de fissure depuis la ligne de chargement (mm)
+
+MA = LIRE_MAILLAGE(FORMAT='MED', UNITE=20)
+
+# groupes de nœuds à partir des groupes de mailles écrits par Gmsh
+MA = DEFI_GROUP(reuse=MA, MAILLAGE=MA,
+                CREA_GROUP_NO=(_F(GROUP_MA='FOND', NOM='NO_FOND'),
+                               _F(GROUP_MA='N_HAUT', NOM='NO_HAUT'),
+                               _F(GROUP_MA='N_BAS', NOM='NO_BAS'),
+                               _F(GROUP_MA='TR_HAUT', NOM='NO_TRH'),
+                               _F(GROUP_MA='TR_BAS', NOM='NO_TRB')))
+
+MOD = AFFE_MODELE(MAILLAGE=MA, AFFE=_F(GROUP_MA='PLAQUE', PHENOMENE='MECANIQUE', MODELISATION='D_PLAN'))
+MAT = DEFI_MATERIAU(ELAS=_F(E=E_YOUNG, NU=NU))
+CHMAT = AFFE_MATERIAU(MAILLAGE=MA, AFFE=_F(TOUT='OUI', MATER=MAT))
+
+# Comme Abaqus (couplage cinématique U1, U2, ur3 libre) : le bord de chaque trou est un corps rigide qui peut tourner.
+# Trou du bas : bloqué en U1 et U2. Trou du haut : bloqué en U1, force verticale 400 N/mm.
+CL = AFFE_CHAR_MECA(MODELE=MOD,
+                    LIAISON_SOLIDE=(_F(GROUP_NO='NO_TRH'), _F(GROUP_NO='NO_TRB')),
+                    DDL_IMPO=(_F(GROUP_NO='NO_BAS', DX=0.0, DY=0.0),
+                              _F(GROUP_NO='NO_HAUT', DX=0.0)))
+FOR = AFFE_CHAR_MECA(MODELE=MOD, FORCE_NODALE=_F(GROUP_NO='NO_HAUT', FY=P_PAR_MM))
+
+RESU = MECA_STATIQUE(MODELE=MOD, CHAM_MATER=CHMAT, EXCIT=(_F(CHARGE=CL), _F(CHARGE=FOR)))
+
+
+# ---------------------------------------------------------------- diagnostic
+MA = DEFI_GROUP(reuse=MA, MAILLAGE=MA,
+                CREA_GROUP_NO=(_F(GROUP_MA='LEV_SUP', NOM='NO_LS'), _F(GROUP_MA='LEV_INF', NOM='NO_LI')))
+RESU = CALC_CHAMP(reuse=RESU, RESULTAT=RESU, FORCE='REAC_NODA')
+
+
+def extraire(gno, champ, cmp_):
+    tab = POST_RELEVE_T(ACTION=_F(INTITULE='D', GROUP_NO=gno, RESULTAT=RESU, NOM_CHAM=champ,
+                                  NOM_CMP=cmp_, OPERATION='EXTRACTION'))
+    v = tab.EXTR_TABLE().values()
+    DETRUIRE(NOM=tab)
+    return v
+
+
+rb = extraire('NO_TRB', 'REAC_NODA', ('DX', 'DY'))
+rh = extraire('NO_TRH', 'REAC_NODA', ('DX', 'DY'))
+print('DIAG reaction trou bas  : sum DX=%.3f  sum DY=%.3f N/mm' % (sum(rb['DX']), sum(rb['DY'])))
+print('DIAG reaction trou haut : sum DX=%.3f  sum DY=%.3f N/mm' % (sum(rh['DX']), sum(rh['DY'])))
+ls = extraire('NO_LS', 'DEPL', ('DY',))
+li = extraire('NO_LI', 'DEPL', ('DY',))
+x0 = min(ls['COOR_X'])
+dy_s = [d for x, d in zip(ls['COOR_X'], ls['DY']) if abs(x - x0) < 1e-6]
+dy_i = [d for x, d in zip(li['COOR_X'], li['DY']) if abs(x - x0) < 1e-6]
+print('DIAG face avant x=%.2f : DY levre sup=%.6f  levre inf=%.6f  ouverture=%.6f mm' % (x0, dy_s[0], dy_i[0], dy_s[0] - dy_i[0]))
+print('DIAG nb noeuds levre sup=%d  levre inf=%d' % (len(ls['DY']), len(li['DY'])))
+
+FF = DEFI_FOND_FISS(MAILLAGE=MA, SYME='NON',
+                    FOND_FISS=_F(GROUP_NO='NO_FOND'),
+                    LEVRE_SUP=_F(GROUP_MA='LEV_SUP'),
+                    LEVRE_INF=_F(GROUP_MA='LEV_INF'))
+
+# rayons des nœuds du disque (progression géométrique, comme dans le maillage)
+q = RATIO ** (1.0 / (N_COUCHES - 1))
+h1 = RAYON * (q - 1.0) / (q ** N_COUCHES - 1.0)
+r = [h1 * (q ** k - 1.0) / (q - 1.0) for k in range(N_COUCHES + 1)]     # r[0] = 0, r[N] = RAYON
+
+# couronnes : on saute la plus petite (comme le contour 1) et on reste sous le bord du disque
+couronnes = []
+for k in range(1, N_COUCHES - 2):
+    couronnes.append((r[k], r[k + 2]))
+
+lignes = ['couronne,r_inf,r_sup,G,K1,G_IRWIN,K1_depuis_G']
+for i, (r_inf, r_sup) in enumerate(couronnes, start=1):
+    TAB = CALC_G(RESULTAT=RESU, OPTION='K',
+                 THETA=_F(FISSURE=FF, R_INF=r_inf, R_SUP=r_sup))
+    t = TAB.EXTR_TABLE().values()
+    if i == 1:
+        print('COLONNES TABLE : %s' % sorted(t.keys()))
+    K1 = t['K1'][0]
+    GI = t['G_IRWIN'][0]
+    G = GI
+    K_G = math.sqrt(G * E_PRIME)
+    lignes.append('%d,%.4f,%.4f,%.6f,%.4f,%.6f,%.4f' % (i, r_inf, r_sup, G, K1, GI, K_G))
+    print('COURONNE %d  R_INF=%.3f  R_SUP=%.3f  G=%.5f N/mm  K1=%.3f  sqrt(G E\')=%.3f MPa*sqrt(mm)'
+          % (i, r_inf, r_sup, G, K1, K_G))
+    DETRUIRE(NOM=TAB)
+
+f = open('fort.30', 'w')
+f.write('\n'.join(lignes) + '\n')
+f.close()
+
+FIN()

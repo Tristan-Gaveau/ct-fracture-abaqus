@@ -8,7 +8,7 @@ ASTM E399, puis durée de vie en propagation de fissure (lois de Paris et de Wal
 contrainte résiduelle par superposition. Tout est scripté en Python (construction du modèle, calculs, lecture,
 figures) et testé.
 
-**État :** calculs terminés. Un paramètre reste sans source, et le README le dit : l'exposant γ de Walker. La ténacité
+**État :** calculs terminés, y compris la comparaison avec un second solveur (Code_Aster). Un paramètre reste sans source, et le README le dit : l'exposant γ de Walker. La ténacité
 K_Ic vient de la NASA TP-1288 (valeur conservative, plage documentée).
 
 ## Résultats clés
@@ -18,12 +18,15 @@ K_Ic vient de la NASA TP-1288 (valeur conservative, plage documentée).
 | K éléments finis, a/W = 0,5 | **17,22 MPa√m**, soit **−0,33 %** par rapport à l'ASTM (17,28) |
 | Convergence de maillage | K varie de **0,06 %** pour un premier élément de 0,27 à 0,05 mm (critère fixé à 0,2 %, atteint) |
 | K(a), 9 longueurs de fissure | écart à l'ASTM **sous 1 %** pour a/W de 0,4 à 0,7 ; +4,0 % à 0,3 et +2,1 % à 0,35 (cause non établie, trois causes écartées) |
+| Comparaison Code_Aster (G-thêta, autre maillage) | écart à Abaqus de **−0,10 % à −0,35 %** sur les 9 longueurs de fissure (critère : sous 1 % pour a/W de 0,4 à 0,7), y compris à 0,3 et 0,35 |
+| Convergence de maillage Code_Aster | K varie de **0,07 %** entre les deux maillages les plus fins (2 225 et 2 889 nœuds ; critère 0,2 %) ; le plus fin donne 17,21, soit −0,02 % d'Abaqus |
 | Qualité des calculs | J indépendant du contour à 0,3 % près, K2/K1 ≤ 0,04 % |
 | Marge à la rupture | K_max/K_Ic = **0,62** à 35 mm (K_Ic = 62,6 MPa√m) ; 0,44 avec la borne haute de la plage (86,8) |
 | Durée de vie, 300M, R = 0,1, a de 20 à 35 mm | **2,5 × 10⁵ cycles** ; K éléments finis et K ASTM donnent le même N à 0,3 % près |
 | Sensibilité au paramètre m de la loi de Paris | N varie d'un **facteur 15** entre m = 2,17 et m = 3,17 ; C ±20 % donne N de +25 % à −17 % |
 
-Courbe K(a) : `results/figures/K_vs_a.png`. Convergence : `results/figures/convergence_maillage.png`. Propagation :
+Courbe K(a) : `results/figures/K_vs_a.png`. Comparaison Abaqus / Code_Aster / ASTM :
+`results/figures/K_vs_a_comparaison.png` et `results/K_comparaison_aster.md`. Convergence : `results/figures/convergence_maillage.png`. Propagation :
 `results/figures/a_de_N.png`.
 
 ### Effet d'une contrainte résiduelle (bonus, profil et amplitude hypothétiques)
@@ -50,6 +53,10 @@ ouverte : l'effet vient de γ. Une compression ralentit quand même la fissure p
   E = 210 GPa et ν = 0,30 (acier générique) ; le handbook donne E ≈ 200 GPa et ν = 0,32.
 - **Éléments finis** : Abaqus Learning Edition 2026, déformations planes, élasticité linéaire, CPE8R et CPE6, disque de
   10 couches autour de la pointe avec biais radial, environ 820 nœuds (807 à 831 ; limite de la Learning Edition : 1 000).
+- **Code_Aster** (17.4.0) : même géométrie, même matériau, mêmes conditions aux limites. Maillage Gmsh 4.15 en triangles
+  quadratiques (environ 1 600 nœuds), disque de pointe de 10 couches avec le même biais radial, fissure à lèvres
+  séparées. K par la méthode G-thêta (`CALC_G`, option `K`), 7 couronnes dont la première est écartée (comme le
+  contour 1 d'Abaqus) ; K = moyenne des couronnes 2 à 7. Détails : `docs/comparaison_code_aster.md`.
 - **K officiel** : moyenne, sur les contours 3 à 10, de √(J·E'). Règle fixée avant l'étude, appliquée à tous les calculs.
 - **Propagation** : Paris `da/dN = C·ΔK^m` avec C = 3,121 × 10⁻¹¹ (m/cycle, MPa√m) et m = 2,672, ajustés sur la figure
   2.3.1.4.9 du MIL-HDBK-5J (15 points numérisés, dispersion d'un facteur 1,07). Walker avec exposant γ pour l'effet de R.
@@ -80,6 +87,14 @@ Détails, règles et décisions : `docs/hypotheses.md`.
   première association valeur/traitement thermique, faite par extraction automatique, était fausse.
 - **Unités de K_Ic** : le script de contrôle `verif_kic.py` a d'abord affiché K_max = 0 (facteur d'unité faux) ; il
   refuse maintenant tout K_max hors de 30 à 50 MPa√m.
+- **Code_Aster, conditions aux limites des trous** : une première version liait les nœuds du bord de chaque trou par
+  une simple égalité de déplacement (`LIAISON_UNIF`), ce qui bloque la rotation du pion. Le calcul tournait et K était
+  stable d'une couronne à l'autre, mais valait 279 au lieu de 544 MPa√mm (−49 %). Deux indicateurs l'ont trahi : la
+  réaction vaut bien 400 N/mm, mais l'ouverture à la face avant n'était que de 0,026 mm contre 0,085 mm après correction. Le
+  couplage cinématique d'Abaqus laisse la rotation libre (`ur3`) : le bord du trou est un corps rigide qui peut tourner
+  (`LIAISON_SOLIDE` dans Code_Aster).
+- **Code_Aster, dimension du maillage** : Gmsh écrit toujours un `.med` en 3D ; Code_Aster refuse alors `DEFI_FOND_FISS`
+  avec un groupe de nœuds. Le script réécrit le `.med` en vrai 2D.
 - **Script contre calcul manuel** : le script reproduit le modèle construit à la main (K à +0,44 %, nœuds à +2,5 %) et le
   dépasse en régularité (dispersion de J 0,2 % contre 2,6 %, K2/K1 nul).
 
@@ -88,7 +103,11 @@ Détails, règles et décisions : `docs/hypotheses.md`.
 - **Petites fissures** : K éléments finis dépasse l'ASTM de +4,0 % (a/W = 0,3) et +2,1 % (0,35). Trois causes testées et
   écartées à a/W = 0,3 : couplage cinématique remplacé par un couplage distribuant (K −0,15 %), disque de pointe réduit
   de 6 à 4 mm (K +0,06 %), taille du premier élément (convergence). Cause probable, non testée : chargement sur tout le
-  bord du trou au lieu d'un contact de goupille sur la moitié côté ligament. La propagation est donc intégrée de a/W = 0,4
+  bord du trou au lieu d'un contact de goupille sur la moitié côté ligament. Code_Aster (autre solveur, autre
+  maillage, autre méthode) retrouve les mêmes valeurs qu'Abaqus à 0,3 et 0,35 (−0,10 % et −0,24 %) : l'écart à l'ASTM
+  ne vient donc ni du solveur, ni du maillage, ni de la méthode de calcul de K, mais du modèle (chargement) ou de la
+  formule à petite fissure. La comparaison valide le solveur et le maillage, pas les conditions aux limites, qui sont
+  identiques dans les deux modèles. La propagation est donc intégrée de a/W = 0,4
   à 0,7 (20 à 35 mm) ; en intégrant dès 15 mm, N éléments finis s'écarterait de −3,9 % de N ASTM.
 - **Plage de ΔK** : les points numérisés (MIL-HDBK-5J, fig. 2.3.1.4.9) couvrent ΔK = 10 à 28,9 ksi√in
   (11,0 à 31,8 MPa√m). Avec R = 0,1, l'étude va jusqu'à ΔK = 34,7 MPa√m (31,6 ksi√in) : le dernier tronçon, de 28,9 à
@@ -108,7 +127,8 @@ Détails, règles et décisions : `docs/hypotheses.md`.
 
 ## Reproduire
 
-Prérequis : Abaqus (testé avec la Learning Edition 2026), Python 3 avec numpy, matplotlib et pytest.
+Prérequis : Abaqus (testé avec la Learning Edition 2026), Python 3 avec numpy, matplotlib et pytest. Pour la
+comparaison : Code_Aster 17.4 (testé sous Windows, version native), `pip install gmsh h5py`.
 
 ```
 pip install -r requirements.txt
@@ -123,6 +143,15 @@ python scripts/paris.py                             # durées de vie
 python scripts/verif_kic.py                         # K_max / K_Ic
 ```
 
+Comparaison Code_Aster (maillage Gmsh, calculs dans `C:\aster_calculs`, puis tableau et figure) :
+
+```
+python scripts/aster/preparer_serie.py --serie --convergence
+# terminal « code_aster » :
+Get-ChildItem C:\aster_calculs\cas_a*, C:\aster_calculs\conv_* -Directory | ForEach-Object { cd $_.FullName; run_aster cas.export *> run.log }
+python scripts/aster/comparer.py
+```
+
 Les calculs Abaqus se font dans `C:\abaqus_calculs` (variable d'environnement `CT_CALCULS` pour changer), hors du dépôt.
 Pour tester le couplage distribuant des trous : variable d'environnement `CT_COUPLAGE=DISTRIBUTING` avant `run_case.py`.
 
@@ -130,15 +159,17 @@ Pour tester le couplage distribuant des trous : variable d'environnement `CT_COU
 
 ```
 scripts/   code (params.py : paramètres uniques ; chemins.py : chemins ; build_ct.py : modèle Abaqus)
+scripts/aster/   maillage Gmsh, fichier de commandes Code_Aster, préparation des cas, comparaison
 tests/     tests automatiques (pytest)
 results/   CSV, figures, .dat bruts (results/raw), tableaux de résultats en .md
-docs/      hypotheses.md (règles et décisions), verifications_environnement.md, depannage_build_ct.md
+docs/      hypotheses.md (règles et décisions), comparaison_code_aster.md, verifications_environnement.md,
+           depannage_build_ct.md
 ```
 
 ## Pour aller plus loin
 
-Modéliser un contact de goupille sur la moitié du trou (origine possible de l'écart aux petites fissures), comparer à
-un autre solveur (Code_Aster), un modèle 3D, un profil de contraintes résiduelles mesuré, une source pour γ, le
+Modéliser un contact de goupille sur la moitié du trou (origine possible de l'écart aux petites fissures), un modèle
+3D, un profil de contraintes résiduelles mesuré, une source pour γ, le
 traitement thermique réel pour K_Ic, des points de la courbe de Paris au-delà de ΔK = 28,9 ksi√in.
 
 ## Références
@@ -150,6 +181,7 @@ traitement thermique réel pour K_Ic, des points de la courbe de Paris au-delà 
 - T. L. Anderson, *Fracture Mechanics: Fundamentals and Applications*.
 - P. Paris, F. Erdogan (1963), « A Critical Analysis of Crack Propagation Laws ».
 - Documentation Abaqus : évaluation des intégrales de contour (*Contour integral evaluation*).
+- Documentation Code_Aster : U4.82.03 (`CALC_G`), U4.82.01 (`DEFI_FOND_FISS`) ; Gmsh (C. Geuzaine, J.-F. Remacle).
 
 ## Licence
 
