@@ -1,4 +1,4 @@
-# ct-fracture-abaqus
+﻿# ct-fracture-abaqus
 
 ![Contrainte S22 sur la déformée (a/W = 0,5)](docs/images/S22_a050_v2.png)
 ![Ouverture de la fissure](docs/images/ouverture_fissure_v2.gif)
@@ -71,7 +71,7 @@ Détails, règles et décisions : `docs/hypotheses.md`.
 
 ## Validation
 
-69 tests automatiques (pytest). Ce que la vérification a révélé en cours de projet :
+72 tests automatiques (pytest). Ce que la vérification a révélé en cours de projet :
 
 - **Épaisseur** : K dépend de P/B. Appliquer 10 000 N sur un modèle d'épaisseur 1 mm donnerait un K 25 fois trop grand ;
   la charge du modèle est donc 400 N/mm.
